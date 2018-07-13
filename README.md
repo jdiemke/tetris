@@ -7,3 +7,7 @@
 [![Twitter](https://img.shields.io/twitter/url/https/github.com/jdiemke/tetris.svg?style=social)](https://twitter.com/intent/tweet?text=Wow:&url=https%3A%2F%2Fgithub.com%2Fjdiemke%2Ftetris)
 
 HTML5 Tetris clone.
+
+## Demo
+
+https://jdiemke.github.io/tetris/
