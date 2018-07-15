@@ -8,8 +8,10 @@ import rotate from './assets/block-rotate.mp3';
 import removalSound from './assets/line-removal.mp3';
 import dropSound from './assets/slow-hit.mp3';
 import Tiles from './assets/tiles.png';
+import { Gamepad2 } from './Gamepad';
 import { SoundManager } from './sound/SoundManager';
 
+const gamepad: Gamepad2 = new Gamepad2();
 const soundManager: SoundManager = new SoundManager();
 
 soundManager.loadSound(Sound.DROP, dropSound);
@@ -87,9 +89,60 @@ document.addEventListener('keypress', (event) => {
     }
 });
 
+let inputElapsedTime = Date.now();
+
+let rotatePressed: boolean = false;
+
 function draw(): void {
     context.fillStyle = '#000000';
     context.fillRect(0, 0, width, height);
+
+    if (gamepad.isButtonPressed(0) && !rotatePressed) {
+        rotatePressed = true;
+        const oldTiles = shape.tiles;
+        shape.rotate();
+        if (field.collides(shape)) {
+            shape.tiles = oldTiles;
+        } else {
+            soundManager.play(Sound.ROTATION);
+        }
+    }
+
+    if (!gamepad.isButtonPressed(0)) {
+        rotatePressed = false;
+    }
+
+    if (Date.now() > inputElapsedTime + 100) {
+        if (gamepad.isLeft(0, -1)) {
+            shape.position.x -= 1;
+            if (field.collides(shape)) {
+                shape.position.x += 1;
+            }
+        }
+
+        if (gamepad.isLeft(0, 1)) {
+            shape.position.x += 1;
+            if (field.collides(shape)) {
+                shape.position.x -= 1;
+            }
+        }
+
+        if (gamepad.isLeft(1, 1)) {
+            shape.position.y += 1;
+            if (field.collides(shape)) {
+                soundManager.play(Sound.DROP);
+                shape.position.y -= 1;
+                field.setBlocks(shape);
+                shape = new ShapeSpawner().getNextShape(image);
+                if (field.removeFullRows()) {
+                    soundManager.play(Sound.REMOVE_ROWS);
+                }
+            }
+        }
+
+        inputElapsedTime = Date.now();
+    }
+
     if (shape !== null) {
         if (Date.now() > elapsedTime + 500) {
             shape.position.y += 1;
