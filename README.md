@@ -14,9 +14,11 @@ https://jdiemke.github.io/tetris/
 
 ## Controls
 
-| Control         | Action                                                   |
-| --------------- | -------------------------------------------------------- |
-| Left Arrow Key  | Move the tetromino to the left                           |
-| Right Arrow Key | Move the tetromino to the right                          |
-| Up Arrow Key    | Rotate the tetromino by 90 degree in clockwise direction |
-| Down Arrow Key  | Drop the tetromino                                       |
+You can use your keyboard or a gamepad to control the game.
+
+| Control                                      | Action                                                   |
+| -------------------------------------------- | -------------------------------------------------------- |
+| Left Arrow Key / Direction Pad Left Button   | Move the tetromino to the left                           |
+| Right Arrow Key / Direction Pad Right Button | Move the tetromino to the right                          |
+| Up Arrow Key / Gamepad Button 1              | Rotate the tetromino by 90 degree in clockwise direction |
+| Down Arrow Key / Direction Pad Down Button   | Drop the tetromino                                       |
