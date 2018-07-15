@@ -1,3 +1,5 @@
+import { Sound } from './sound/Sound';
+
 import { Playfield } from './Playfield';
 import { Shape } from './Shape';
 import { ShapeSpawner } from './ShapeSpawner';
@@ -6,38 +8,13 @@ import rotate from './assets/block-rotate.mp3';
 import removalSound from './assets/line-removal.mp3';
 import dropSound from './assets/slow-hit.mp3';
 import Tiles from './assets/tiles.png';
+import { SoundManager } from './sound/SoundManager';
 
-const audioContext = new AudioContext();
-let drop: AudioBuffer;
-let rot: AudioBuffer;
-let rem: AudioBuffer;
-window.fetch(dropSound)
-    .then((response: Response) => response.arrayBuffer())
-    .then((arrayBuffer: ArrayBuffer) => audioContext.decodeAudioData(arrayBuffer))
-    .then((audioBuffer: AudioBuffer) => {
-        drop = audioBuffer;
-    });
+const soundManager: SoundManager = new SoundManager();
 
-window.fetch(removalSound)
-    .then((response: Response) => response.arrayBuffer())
-    .then((arrayBuffer: ArrayBuffer) => audioContext.decodeAudioData(arrayBuffer))
-    .then((audioBuffer: AudioBuffer) => {
-        rem = audioBuffer;
-    });
-
-window.fetch(rotate)
-    .then((response: Response) => response.arrayBuffer())
-    .then((arrayBuffer: ArrayBuffer) => audioContext.decodeAudioData(arrayBuffer))
-    .then((audioBuffer: AudioBuffer) => {
-        rot = audioBuffer;
-    });
-
-function play(audioBuffer: AudioBuffer) {
-    const source = audioContext.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(audioContext.destination);
-    source.start();
-}
+soundManager.loadSound(Sound.DROP, dropSound);
+soundManager.loadSound(Sound.REMOVE_ROWS, removalSound);
+soundManager.loadSound(Sound.ROTATION, rotate);
 
 const width: number = 10 * 16;
 const height: number = 20 * 16;
@@ -92,19 +69,19 @@ document.addEventListener('keypress', (event) => {
         if (field.collides(shape)) {
             shape.tiles = oldTiles;
         } else {
-            play(rot);
+            soundManager.play(Sound.ROTATION);
         }
     }
 
     if (event.keyCode === 40) {
         shape.position.y += 1;
         if (field.collides(shape)) {
-            play(drop);
+            soundManager.play(Sound.DROP);
             shape.position.y -= 1;
             field.setBlocks(shape);
             shape = new ShapeSpawner().getNextShape(image);
             if (field.removeFullRows()) {
-                play(rem);
+                soundManager.play(Sound.REMOVE_ROWS);
             }
         }
     }
@@ -117,12 +94,12 @@ function draw(): void {
         if (Date.now() > elapsedTime + 500) {
             shape.position.y += 1;
             if (field.collides(shape)) {
-                play(drop);
+                soundManager.play(Sound.DROP);
                 shape.position.y -= 1;
                 field.setBlocks(shape);
                 shape = new ShapeSpawner().getNextShape(image);
                 if (field.removeFullRows()) {
-                    play(rem);
+                    soundManager.play(Sound.REMOVE_ROWS);
                 }
             }
             elapsedTime = Date.now();
