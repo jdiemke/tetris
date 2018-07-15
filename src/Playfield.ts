@@ -27,14 +27,16 @@ export class Playfield {
         return fullRow;
     }
 
-    public removeFullRows(): void {
+    public removeFullRows(): boolean {
+        let removal = false;
         for (let y: number = 0; y < this.height; y++) {
             if (this.isFullRow(y)) {
                 this.field.splice(y * 10, 10);
                 this.field.unshift(...[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+                removal = true;
             }
         }
-        console.table(this.field);
+        return removal;
     }
 
     public draw(context: CanvasRenderingContext2D): void {
