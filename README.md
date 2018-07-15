@@ -11,3 +11,12 @@ HTML5 Tetris clone.
 ## Demo
 
 https://jdiemke.github.io/tetris/
+
+## Controls
+
+| Control         | Action                                                   |
+| --------------- | -------------------------------------------------------- |
+| Left Arrow Key  | Move the tetromino to the left                           |
+| Right Arrow Key | Move the tetromino to the right                          |
+| Up Arrow Key    | Rotate the tetromino by 90 degree in clockwise direction |
+| Down Arrow Key  | Drop the tetromino                                       |
