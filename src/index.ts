@@ -2,7 +2,43 @@ import { Playfield } from './Playfield';
 import { Shape } from './Shape';
 import { ShapeSpawner } from './ShapeSpawner';
 
+import rotate from './assets/block-rotate.mp3';
+import removalSound from './assets/line-removal.mp3';
+import dropSound from './assets/slow-hit.mp3';
 import Tiles from './assets/tiles.png';
+
+const audioContext = new AudioContext();
+let drop: AudioBuffer;
+let rot: AudioBuffer;
+let rem: AudioBuffer;
+window.fetch(dropSound)
+    .then((response: Response) => response.arrayBuffer())
+    .then((arrayBuffer: ArrayBuffer) => audioContext.decodeAudioData(arrayBuffer))
+    .then((audioBuffer: AudioBuffer) => {
+        drop = audioBuffer;
+    });
+
+window.fetch(removalSound)
+    .then((response: Response) => response.arrayBuffer())
+    .then((arrayBuffer: ArrayBuffer) => audioContext.decodeAudioData(arrayBuffer))
+    .then((audioBuffer: AudioBuffer) => {
+        rem = audioBuffer;
+    });
+
+window.fetch(rotate)
+    .then((response: Response) => response.arrayBuffer())
+    .then((arrayBuffer: ArrayBuffer) => audioContext.decodeAudioData(arrayBuffer))
+    .then((audioBuffer: AudioBuffer) => {
+        rot = audioBuffer;
+    });
+
+function play(audioBuffer: AudioBuffer) {
+    const source = audioContext.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(audioContext.destination);
+    source.start();
+}
+
 const width: number = 10 * 16;
 const height: number = 20 * 16;
 
@@ -54,17 +90,22 @@ document.addEventListener('keypress', (event) => {
         const oldTiles = shape.tiles;
         shape.rotate();
         if (field.collides(shape)) {
-           shape.tiles = oldTiles;
+            shape.tiles = oldTiles;
+        } else {
+            play(rot);
         }
     }
 
     if (event.keyCode === 40) {
         shape.position.y += 1;
         if (field.collides(shape)) {
+            play(drop);
             shape.position.y -= 1;
             field.setBlocks(shape);
             shape = new ShapeSpawner().getNextShape(image);
-            field.removeFullRows();
+            if (field.removeFullRows()) {
+                play(rem);
+            }
         }
     }
 });
@@ -76,10 +117,13 @@ function draw(): void {
         if (Date.now() > elapsedTime + 500) {
             shape.position.y += 1;
             if (field.collides(shape)) {
+                play(drop);
                 shape.position.y -= 1;
                 field.setBlocks(shape);
                 shape = new ShapeSpawner().getNextShape(image);
-                field.removeFullRows();
+                if (field.removeFullRows()) {
+                    play(rem);
+                }
             }
             elapsedTime = Date.now();
         }
