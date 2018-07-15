@@ -51,9 +51,10 @@ document.addEventListener('keypress', (event) => {
         }
     }
     if (event.keyCode === 38) {
+        const oldTiles = shape.tiles;
         shape.rotate();
         if (field.collides(shape)) {
-            // rotate back
+           shape.tiles = oldTiles;
         }
     }
 
@@ -63,6 +64,7 @@ document.addEventListener('keypress', (event) => {
             shape.position.y -= 1;
             field.setBlocks(shape);
             shape = new ShapeSpawner().getNextShape(image);
+            field.removeFullRows();
         }
     }
 });
@@ -77,12 +79,12 @@ function draw(): void {
                 shape.position.y -= 1;
                 field.setBlocks(shape);
                 shape = new ShapeSpawner().getNextShape(image);
+                field.removeFullRows();
             }
             elapsedTime = Date.now();
         }
     }
 
-    field.removeFullRows();
     field.draw(context);
     if (shape !== null) {
         shape.draw(context);

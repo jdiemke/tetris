@@ -3,18 +3,16 @@ import { Position } from './Position';
 export class Shape {
 
     public position: Position = new Position(3, 0);
-    public width: number = 4;
-    public height: number = 4;
-    private tiles: Array<number>;
+    public tiles: Array<Array<number>>;
 
-    public constructor(tiles: Array<number>, private image: HTMLImageElement) {
+    public constructor(tiles: Array<Array<number>>, private image: HTMLImageElement) {
         this.tiles = tiles;
     }
 
     public draw(context: CanvasRenderingContext2D): void {
-        for (let y: number = 0; y < this.height; y++) {
-            for (let x: number = 0; x < this.width; x++) {
-                const num: number = this.tiles[x + y * this.width];
+        for (let y: number = 0; y < this.tiles.length; y++) {
+            for (let x: number = 0; x < this.tiles[y].length; x++) {
+                const num: number = this.tiles[y][x];
                 if (num === 1) {
                     context.drawImage(this.image, 0, 0, 16, 16,
                         this.position.x * 16 + x * 16, this.position.y * 16 + y * 16, 16, 16
@@ -25,11 +23,16 @@ export class Shape {
     }
 
     public rotate(): void {
-        const temp: Array<number> = Array<number>(this.tiles.length);
+        const temp: Array<Array<number>> = new Array<Array<number>>(this.tiles[0].length);
+        for (let i = 0; i < this.tiles[0].length; i++) {
+            const arr = new Array<number>(this.tiles.length);
+            arr.fill(0);
+            temp[i] = arr;
+        }
 
-        for (let y: number = 0; y < this.height; y++) {
-            for (let x: number = 0; x < this.width; x++) {
-                temp[x + (this.height - 1 - y) * this.width] = this.tiles[y + x * this.width];
+        for (let y: number = 0; y < this.tiles.length; y++) {
+            for (let x: number = 0; x < this.tiles[y].length; x++) {
+                temp[x][this.tiles.length - 1 - y] = this.tiles[y][x];
             }
         }
 
@@ -38,9 +41,9 @@ export class Shape {
 
     public getTiles(): Array<Position> {
         const tiles = Array<Position>();
-        for (let y: number = 0; y < this.height; y++) {
-            for (let x: number = 0; x < this.width; x++) {
-                const num: number = this.tiles[x + y * this.width];
+        for (let y: number = 0; y < this.tiles.length; y++) {
+            for (let x: number = 0; x < this.tiles[y].length; x++) {
+                const num: number = this.tiles[y][x];
 
                 if (num === 1) {
                     tiles.push(new Position(x + this.position.x, y + this.position.y));
