@@ -16,6 +16,10 @@ module.exports = {
             {
                 test: /\.ts$/,
                 use: 'ts-loader'
+            },
+            {
+                test: /\.(png|jpg|mp3|ogg)$/,
+                use: 'file-loader'
             }
         ]
     },
