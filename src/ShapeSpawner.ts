@@ -11,44 +11,44 @@ export class ShapeSpawner {
                 return new Shape([
                     [1, 1],
                     [1, 1],
-                ], image);
+                ], image, 4);
             case 1:
                 return new Shape([
                     [0, 1, 0],
                     [1, 1, 1],
                     [0, 0, 0]
-                ], image);
+                ], image, 6);
             case 2:
                 return new Shape([
                     [0, 0, 0, 0],
                     [1, 1, 1, 1],
                     [0, 0, 0, 0],
                     [0, 0, 0, 0]
-                ], image);
+                ], image, 5);
             case 3:
                 return new Shape([
                     [1, 0, 0],
                     [1, 1, 1],
                     [0, 0, 0]
-                ], image);
+                ], image, 2);
             case 4:
                 return new Shape([
                     [0, 0, 1],
                     [1, 1, 1],
                     [0, 0, 0]
-                ], image);
+                ], image, 7);
             case 5:
                 return new Shape([
                     [0, 1, 1],
                     [1, 1, 0],
                     [0, 0, 0]
-                ], image);
+                ], image, 3);
             case 6:
                 return new Shape([
                     [1, 1, 0],
                     [0, 1, 1],
                     [0, 0, 0]
-                ], image);
+                ], image, 8);
         }
     }
 
