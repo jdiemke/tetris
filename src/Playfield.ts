@@ -40,16 +40,30 @@ export class Playfield {
     }
 
     public draw(context: CanvasRenderingContext2D): void {
+        context.setTransform(1, 0, 0, 1, 0, 0);
+
+        for (let y: number = 0; y < this.height + 1; y++) {
+            for (let x: number = 0; x < this.width + 2; x++) {
+                this.drawSprite(context, x, y, 0);
+            }
+        }
+
+        context.translate(16, 0);
+
         for (let y: number = 0; y < this.height; y++) {
             for (let x: number = 0; x < this.width; x++) {
                 const num: number = this.field[x + y * this.width];
-                if (num === 1) {
-                    context.drawImage(this.image, 16, 0, 16, 16, x * 16, y * 16, 16, 16);
+                if (num !== 0) {
+                    this.drawSprite(context, x, y, num);
                 } else {
-                    context.drawImage(this.image, 16 * 3, 0, 16, 16, x * 16, y * 16, 16, 16);
+                    this.drawSprite(context, x, y, 1);
                 }
             }
         }
+    }
+
+    public drawSprite(context: CanvasRenderingContext2D, x: number, y: number, sprite: number): void {
+        context.drawImage(this.image, 16 * sprite, 0, 16, 16, x * 16, y * 16, 16, 16);
     }
 
     public collides(shape: Shape): boolean {
@@ -72,7 +86,7 @@ export class Playfield {
         for (let i: number = 0; i < tiles.length; i++) {
             const tile: Position = tiles[i];
 
-            this.set(tile.x, tile.y);
+            this.set(tile.x, tile.y, shape.spriteId);
         }
 
         return false;
@@ -82,11 +96,11 @@ export class Playfield {
         if (x < 0 || y < 0 || x >= this.width || y >= this.height) {
             return true;
         }
-        return this.field[x + y * this.width] === 1;
+        return this.field[x + y * this.width] !== 0;
     }
 
-    public set(x: number, y: number): void {
-        this.field[x + y * this.width] = 1;
+    public set(x: number, y: number, tileId: number = 1): void {
+        this.field[x + y * this.width] = tileId;
     }
 
 }

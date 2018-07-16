@@ -7,7 +7,7 @@ import { ShapeSpawner } from './ShapeSpawner';
 import rotate from './assets/block-rotate.mp3';
 import removalSound from './assets/line-removal.mp3';
 import dropSound from './assets/slow-hit.mp3';
-import Tiles from './assets/tiles.png';
+import Tiles from './assets/sprites.png';
 import { Gamepad2 } from './Gamepad';
 import { SoundManager } from './sound/SoundManager';
 
@@ -18,8 +18,8 @@ soundManager.loadSound(Sound.DROP, dropSound);
 soundManager.loadSound(Sound.REMOVE_ROWS, removalSound);
 soundManager.loadSound(Sound.ROTATION, rotate);
 
-const width: number = 10 * 16;
-const height: number = 20 * 16;
+const width: number = 12 * 16;
+const height: number = 21 * 16;
 
 const canvas: HTMLCanvasElement = document.createElement('canvas');
 canvas.width = width;

@@ -4,9 +4,11 @@ export class Shape {
 
     public position: Position = new Position(3, 0);
     public tiles: Array<Array<number>>;
+    public spriteId: number;
 
-    public constructor(tiles: Array<Array<number>>, private image: HTMLImageElement) {
+    public constructor(tiles: Array<Array<number>>, private image: HTMLImageElement, sprite: number = 2) {
         this.tiles = tiles;
+        this.spriteId = sprite;
     }
 
     public draw(context: CanvasRenderingContext2D): void {
@@ -14,7 +16,7 @@ export class Shape {
             for (let x: number = 0; x < this.tiles[y].length; x++) {
                 const num: number = this.tiles[y][x];
                 if (num === 1) {
-                    context.drawImage(this.image, 0, 0, 16, 16,
+                    context.drawImage(this.image, 16 * this.spriteId, 0, 16, 16,
                         this.position.x * 16 + x * 16, this.position.y * 16 + y * 16, 16, 16
                     );
                 }
