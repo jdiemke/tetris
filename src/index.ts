@@ -52,7 +52,7 @@ image.src = Tiles;
 
 let elapsedTime: number = Date.now();
 
-document.addEventListener('keypress', (event) => {
+document.addEventListener('keydown', (event) => {
     if (event.keyCode === 37) {
         shape.position.x -= 1;
         if (field.collides(shape)) {
