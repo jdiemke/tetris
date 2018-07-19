@@ -55,9 +55,9 @@ image.src = Tiles;
 
 let elapsedTime: number = Date.now();
 
-document.addEventListener('touchstart', touchHandler1);
-document.addEventListener('touchmove', touchHandler);
-document.addEventListener('touchend', touchHandler12);
+canvas.addEventListener('touchstart', touchHandler1);
+canvas.addEventListener('touchmove', touchHandler);
+canvas.addEventListener('touchend', touchHandler12);
 
 function touchHandler12(e) {
     touchLeft = false;
