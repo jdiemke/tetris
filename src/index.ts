@@ -82,6 +82,35 @@ function touchHandler1(e: TouchEvent) {
         e.stopPropagation();
         startPos.x = playerX;
         startPos.y = playerY;
+        console.log(playerX);
+
+        if (playerY < 360) {
+            const oldTiles = shape.tiles;
+            shape.rotate();
+            if (field.collides(shape)) {
+                shape.tiles = oldTiles;
+            } else {
+                soundManager.play(Sound.ROTATION);
+            }
+        } else {
+
+            if (playerX < 640) {
+                console.log('left ');
+                shape.position.x -= 1;
+                if (field.collides(shape)) {
+                    shape.position.x += 1;
+                }
+            }
+
+            if (playerX > 640) {
+                console.log('right ');
+                shape.position.x += 1;
+                if (field.collides(shape)) {
+                    shape.position.x -= 1;
+                }
+            }
+        }
+
     }
 }
 
@@ -89,27 +118,6 @@ function touchHandler(e) {
     if (e.touches) {
         const playerX = e.touches[0].pageX - canvas.offsetLeft;
         const playerY = e.touches[0].pageY - canvas.offsetTop;
-        console.log('move x: ' + playerX + ', y: ' + playerY);
-        e.preventDefault();
-
-        const diff = (playerX - startPos.x) / (16 * 2);
-        const diff2 = Math.round(diff) - Math.round((shape.position.x + shape.tiles[0].length / 2) - 4.5);
-        console.log('diff ' + diff2);
-        console.log('shape ' + (shape.position.x - 5));
-        if (diff2 === 0) {
-            touchLeft = false;
-            touchRight = false;
-        }
-        if (diff2 < 0) {
-            touchLeft = true;
-            touchRight = false;
-        }
-
-        if (diff2 > 0) {
-            touchLeft = false;
-            touchRight = true;
-        }
-
     }
 }
 
