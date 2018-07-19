@@ -8,10 +8,10 @@ import rotate from './assets/block-rotate.mp3';
 import removalSound from './assets/line-removal.mp3';
 import dropSound from './assets/slow-hit.mp3';
 import Tiles from './assets/sprites.png';
+import { FullscreenUtils } from './fullscreen/FullscreenUtils';
 import { Gamepad2 } from './Gamepad';
 import { Position } from './Position';
 import { SoundManager } from './sound/SoundManager';
-import { FullscreenUtils } from './fullscreen/FullscreenUtils';
 
 const gamepad: Gamepad2 = new Gamepad2();
 const soundManager: SoundManager = new SoundManager();
@@ -53,8 +53,6 @@ image.onload = () => {
 };
 image.src = Tiles;
 
-
-
 let elapsedTime: number = Date.now();
 
 document.addEventListener('touchstart', touchHandler1);
@@ -74,6 +72,7 @@ function touchHandler1(e: TouchEvent) {
 
     if (fullscreen === false) {
         FullscreenUtils.fullscreen(canvas);
+        fullscreen = true;
     }
     if (e.touches) {
         const playerX = e.touches[0].pageX - canvas.offsetLeft;
@@ -162,9 +161,9 @@ let rotatePressed: boolean = false;
 
 function draw(): void {
     context.setTransform(1, 0, 0, 1, 0, 0);
-  
+
     context.fillStyle = '#000000';
-    context.fillRect(1, 1, width-2, height-2);
+    context.fillRect(1, 1, width - 2, height - 2);
 
     if (gamepad.isButtonPressed(0) && !rotatePressed) {
         rotatePressed = true;

@@ -40,8 +40,7 @@ export class Playfield {
     }
 
     public draw(context: CanvasRenderingContext2D): void {
-        context.translate(640/2-(12*16)/2, 12);
-       
+        context.translate(640 / 2 - (12 * 16) / 2, 12);
 
         for (let y: number = 0; y < this.height + 1; y++) {
             for (let x: number = 0; x < this.width + 2; x++) {
