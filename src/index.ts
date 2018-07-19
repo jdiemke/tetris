@@ -9,6 +9,7 @@ import removalSound from './assets/line-removal.mp3';
 import dropSound from './assets/slow-hit.mp3';
 import Tiles from './assets/sprites.png';
 import { Gamepad2 } from './Gamepad';
+import { Position } from './Position';
 import { SoundManager } from './sound/SoundManager';
 
 const gamepad: Gamepad2 = new Gamepad2();
@@ -51,6 +52,58 @@ image.onload = () => {
 image.src = Tiles;
 
 let elapsedTime: number = Date.now();
+
+document.addEventListener('touchstart', touchHandler1);
+document.addEventListener('touchmove', touchHandler);
+document.addEventListener('touchend', touchHandler12);
+
+function touchHandler12(e) {
+    touchLeft = false;
+    touchRight = false;
+}
+
+const startPos: Position = new Position(0, 0);
+let touchLeft = false;
+let touchRight = false;
+
+function touchHandler1(e) {
+    if (e.touches) {
+        const playerX = e.touches[0].pageX - canvas.offsetLeft;
+        const playerY = e.touches[0].pageY - canvas.offsetTop;
+        console.log('start x: ' + playerX + ', y: ' + playerY);
+        e.preventDefault();
+        startPos.x = playerX;
+        startPos.y = playerY;
+    }
+}
+
+function touchHandler(e) {
+    if (e.touches) {
+        const playerX = e.touches[0].pageX - canvas.offsetLeft;
+        const playerY = e.touches[0].pageY - canvas.offsetTop;
+        console.log('move x: ' + playerX + ', y: ' + playerY);
+        e.preventDefault();
+
+        const diff = (playerX - startPos.x) / (16 * 2);
+        const diff2 = Math.round(diff) - Math.round((shape.position.x + shape.tiles[0].length / 2) - 4.5);
+        console.log('diff ' + diff2);
+        console.log('shape ' + (shape.position.x - 5));
+        if (diff2 === 0) {
+            touchLeft = false;
+            touchRight = false;
+        }
+        if (diff2 < 0) {
+            touchLeft = true;
+            touchRight = false;
+        }
+
+        if (diff2 > 0) {
+            touchLeft = false;
+            touchRight = true;
+        }
+
+    }
+}
 
 document.addEventListener('keydown', (event) => {
     if (event.keyCode === 37) {
@@ -113,14 +166,14 @@ function draw(): void {
     }
 
     if (Date.now() > inputElapsedTime + 100) {
-        if (gamepad.isLeft(0, -1)) {
+        if (gamepad.isLeft(0, -1) || touchLeft) {
             shape.position.x -= 1;
             if (field.collides(shape)) {
                 shape.position.x += 1;
             }
         }
 
-        if (gamepad.isLeft(0, 1)) {
+        if (gamepad.isLeft(0, 1) || touchRight) {
             shape.position.x += 1;
             if (field.collides(shape)) {
                 shape.position.x -= 1;
