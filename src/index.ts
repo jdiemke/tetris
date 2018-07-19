@@ -8,6 +8,7 @@ import rotate from './assets/block-rotate.mp3';
 import removalSound from './assets/line-removal.mp3';
 import dropSound from './assets/slow-hit.mp3';
 import Tiles from './assets/sprites.png';
+import { FullscreenUtils } from './fullscreen/FullscreenUtils';
 import { Gamepad2 } from './Gamepad';
 import { Position } from './Position';
 import { SoundManager } from './sound/SoundManager';
@@ -19,8 +20,8 @@ soundManager.loadSound(Sound.DROP, dropSound);
 soundManager.loadSound(Sound.REMOVE_ROWS, removalSound);
 soundManager.loadSound(Sound.ROTATION, rotate);
 
-const width: number = 12 * 16;
-const height: number = 21 * 16;
+const width: number = 640;
+const height: number = 360;
 
 const canvas: HTMLCanvasElement = document.createElement('canvas');
 canvas.width = width;
@@ -48,6 +49,7 @@ image.onload = () => {
     shape = new ShapeSpawner().getNextShape(image);
     field = new Playfield(10, 20, image);
     requestAnimationFrame(() => draw());
+
 };
 image.src = Tiles;
 
@@ -65,13 +67,19 @@ function touchHandler12(e) {
 const startPos: Position = new Position(0, 0);
 let touchLeft = false;
 let touchRight = false;
+let fullscreen = false;
+function touchHandler1(e: TouchEvent) {
 
-function touchHandler1(e) {
+    if (fullscreen === false) {
+        FullscreenUtils.fullscreen(canvas);
+        fullscreen = true;
+    }
     if (e.touches) {
         const playerX = e.touches[0].pageX - canvas.offsetLeft;
         const playerY = e.touches[0].pageY - canvas.offsetTop;
         console.log('start x: ' + playerX + ', y: ' + playerY);
         e.preventDefault();
+        e.stopPropagation();
         startPos.x = playerX;
         startPos.y = playerY;
     }
@@ -106,6 +114,11 @@ function touchHandler(e) {
 }
 
 document.addEventListener('keydown', (event) => {
+
+    if (event.keyCode === 70) {
+        FullscreenUtils.fullscreen(canvas);
+    }
+
     if (event.keyCode === 37) {
         shape.position.x -= 1;
         if (field.collides(shape)) {
@@ -147,8 +160,10 @@ let inputElapsedTime = Date.now();
 let rotatePressed: boolean = false;
 
 function draw(): void {
+    context.setTransform(1, 0, 0, 1, 0, 0);
+
     context.fillStyle = '#000000';
-    context.fillRect(0, 0, width, height);
+    context.fillRect(1, 1, width - 2, height - 2);
 
     if (gamepad.isButtonPressed(0) && !rotatePressed) {
         rotatePressed = true;
