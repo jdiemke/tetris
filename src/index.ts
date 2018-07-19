@@ -62,6 +62,14 @@ function touchHandler12(e) {
     touchRight = false;
 }
 
+function inside(x: number, y: number, xcent: number, ycent: number, radius: number): boolean {
+    const xdiff = x - xcent;
+    const ydiff = y - ycent;
+    const length = Math.sqrt(xdiff * xdiff + ydiff * ydiff);
+
+    return length < radius;
+}
+
 const startPos: Position = new Position(0, 0);
 let touchLeft = false;
 let touchRight = false;
@@ -82,7 +90,7 @@ function touchHandler1(e: TouchEvent) {
         startPos.y = playerY;
         console.log(playerX);
 
-        if (playerY < 180) {
+        if (inside(playerX, playerY, 640 - 50 - 10, 360 - 50 - 10, 50)) {
             const oldTiles = shape.tiles;
             shape.rotate();
             if (field.collides(shape)) {
@@ -90,22 +98,34 @@ function touchHandler1(e: TouchEvent) {
             } else {
                 soundManager.play(Sound.ROTATION);
             }
-        } else {
+        }
 
-            if (playerX < 320) {
-                console.log('left ');
-                shape.position.x -= 1;
-                if (field.collides(shape)) {
-                    shape.position.x += 1;
+        if (inside(playerX, playerY, 50 + 10, 360 - 50 - 10, 50)) {
+            console.log('left ');
+            shape.position.x -= 1;
+            if (field.collides(shape)) {
+                shape.position.x += 1;
+            }
+        }
+
+        if (inside(playerX, playerY, 640 - 100 - 50 - 20, 360 - 50 - 10, 50)) {
+            shape.position.y += 1;
+            if (field.collides(shape)) {
+                soundManager.play(Sound.DROP);
+                shape.position.y -= 1;
+                field.setBlocks(shape);
+                shape = new ShapeSpawner().getNextShape(image);
+                if (field.removeFullRows()) {
+                    soundManager.play(Sound.REMOVE_ROWS);
                 }
             }
+        }
 
-            if (playerX > 320) {
-                console.log('right ');
-                shape.position.x += 1;
-                if (field.collides(shape)) {
-                    shape.position.x -= 1;
-                }
+        if (inside(playerX, playerY, 50 + 10 + 100 + 10, 360 - 50 - 10, 50)) {
+            console.log('right ');
+            shape.position.x += 1;
+            if (field.collides(shape)) {
+                shape.position.x -= 1;
             }
         }
 
@@ -168,8 +188,8 @@ let rotatePressed: boolean = false;
 function draw(): void {
     context.setTransform(1, 0, 0, 1, 0, 0);
 
-    context.fillStyle = '#000000';
-    context.fillRect(1, 1, width - 2, height - 2);
+    context.fillStyle = '#222222';
+    context.fillRect(0, 0, width, height);
 
     if (gamepad.isButtonPressed(0) && !rotatePressed) {
         rotatePressed = true;
@@ -237,5 +257,36 @@ function draw(): void {
     if (shape !== null) {
         shape.draw(context);
     }
+
+    context.setTransform(1, 0, 0, 1, 0, 0);
+
+    context.beginPath();
+    context.arc(50 + 10, 360 - 50 - 10, 50, 0, Math.PI * 2, true);
+
+    context.lineWidth = 3;
+    context.strokeStyle = '#bbbbbb';
+    context.stroke();
+
+    context.beginPath();
+    context.arc(50 + 10 + 100 + 10, 360 - 50 - 10, 50, 0, Math.PI * 2, true);
+
+    context.lineWidth = 3;
+    context.strokeStyle = '#bbbbbb';
+    context.stroke();
+
+    context.beginPath();
+    context.arc(640 - 50 - 10, 360 - 50 - 10, 50, 0, Math.PI * 2, true);
+
+    context.lineWidth = 3;
+    context.strokeStyle = '#bbbbbb';
+    context.stroke();
+
+    context.beginPath();
+    context.arc(640 - 100 - 50 - 20, 360 - 50 - 10, 50, 0, Math.PI * 2, true);
+
+    context.lineWidth = 3;
+    context.strokeStyle = '#bbbbbb';
+    context.stroke();
+
     requestAnimationFrame(() => draw());
 }
