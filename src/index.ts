@@ -35,8 +35,6 @@ canvas.style.cssText = 'image-rendering: optimizeSpeed;' + // FireFox < 6.0
     'image-rendering: -webkit-optimize-contrast;' + // Safari
     'image-rendering: pixelated; ' + // Future browsers
     '-ms-interpolation-mode: nearest-neighbor;'; // IE
-canvas.style.width = `${width * 2}px`;
-canvas.style.height = `${height * 2}px`;
 document.body.appendChild(canvas);
 
 const context: CanvasRenderingContext2D = canvas.getContext('2d');
@@ -84,7 +82,7 @@ function touchHandler1(e: TouchEvent) {
         startPos.y = playerY;
         console.log(playerX);
 
-        if (playerY < 360) {
+        if (playerY < 180) {
             const oldTiles = shape.tiles;
             shape.rotate();
             if (field.collides(shape)) {
@@ -94,7 +92,7 @@ function touchHandler1(e: TouchEvent) {
             }
         } else {
 
-            if (playerX < 640) {
+            if (playerX < 320) {
                 console.log('left ');
                 shape.position.x -= 1;
                 if (field.collides(shape)) {
@@ -102,7 +100,7 @@ function touchHandler1(e: TouchEvent) {
                 }
             }
 
-            if (playerX > 640) {
+            if (playerX > 320) {
                 console.log('right ');
                 shape.position.x += 1;
                 if (field.collides(shape)) {
