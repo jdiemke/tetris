@@ -85,7 +85,7 @@ function getMousePos(canv: HTMLCanvasElement, evt: TouchEvent) {
 function touchHandler1(e: TouchEvent) {
 
     if (fullscreen === false) {
-        FullscreenUtils.fullscreen(canvas);
+        FullscreenUtils.fullscreen(document.documentElement);
         fullscreen = true;
     }
     if (e.touches) {
@@ -146,7 +146,7 @@ function touchHandler1(e: TouchEvent) {
 document.addEventListener('keydown', (event) => {
 
     if (event.keyCode === 70) {
-        FullscreenUtils.fullscreen(canvas);
+        FullscreenUtils.fullscreen(document.documentElement);
     }
 
     if (event.keyCode === 37) {
