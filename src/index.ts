@@ -109,16 +109,18 @@ function touchHandler1(e: TouchEvent) {
         }
 
         if (inside(playerX, playerY, 640 - 100 - 50 - 20, 360 - 50 - 10, 50)) {
-            shape.position.y += 1;
-            if (field.collides(shape)) {
-                soundManager.play(Sound.DROP);
-                shape.position.y -= 1;
-                field.setBlocks(shape);
-                shape = new ShapeSpawner().getNextShape(image);
-                if (field.removeFullRows()) {
-                    soundManager.play(Sound.REMOVE_ROWS);
-                }
+            do {
+                shape.position.y += 1;
+            } while (!field.collides(shape));
+
+            soundManager.play(Sound.DROP);
+            shape.position.y -= 1;
+            field.setBlocks(shape);
+            shape = new ShapeSpawner().getNextShape(image);
+            if (field.removeFullRows()) {
+                soundManager.play(Sound.REMOVE_ROWS);
             }
+
         }
 
         if (inside(playerX, playerY, 50 + 10 + 100 + 10, 360 - 50 - 10, 50)) {
@@ -168,15 +170,16 @@ document.addEventListener('keydown', (event) => {
     }
 
     if (event.keyCode === 40) {
-        shape.position.y += 1;
-        if (field.collides(shape)) {
-            soundManager.play(Sound.DROP);
-            shape.position.y -= 1;
-            field.setBlocks(shape);
-            shape = new ShapeSpawner().getNextShape(image);
-            if (field.removeFullRows()) {
-                soundManager.play(Sound.REMOVE_ROWS);
-            }
+        do {
+            shape.position.y += 1;
+        } while (!field.collides(shape));
+
+        soundManager.play(Sound.DROP);
+        shape.position.y -= 1;
+        field.setBlocks(shape);
+        shape = new ShapeSpawner().getNextShape(image);
+        if (field.removeFullRows()) {
+            soundManager.play(Sound.REMOVE_ROWS);
         }
     }
 });
@@ -254,6 +257,21 @@ function draw(): void {
     }
 
     field.draw(context);
+
+    // draw ghost
+    const ghost = new Shape(shape.tiles, image, 9);
+    ghost.position.y = shape.position.y;
+    ghost.position.x = shape.position.x;
+    do {
+        ghost.position.y += 1;
+    } while (!field.collides(ghost));
+
+    ghost.position.y -= 1;
+
+    context.globalAlpha = 0.24;
+    ghost.draw(context);
+    context.globalAlpha = 1;
+
     if (shape !== null) {
         shape.draw(context);
     }
