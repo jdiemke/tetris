@@ -54,7 +54,6 @@ image.src = Tiles;
 let elapsedTime: number = Date.now();
 
 canvas.addEventListener('touchstart', touchHandler1);
-canvas.addEventListener('touchmove', touchHandler);
 canvas.addEventListener('touchend', touchHandler12);
 
 function touchHandler12(e) {
@@ -74,6 +73,15 @@ const startPos: Position = new Position(0, 0);
 let touchLeft = false;
 let touchRight = false;
 let fullscreen = false;
+
+function getMousePos(canv: HTMLCanvasElement, evt: TouchEvent) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+        x: (evt.touches[0].clientX - rect.left) / (rect.right - rect.left) * canvas.width,
+        y: (evt.touches[0].clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
+    };
+}
+
 function touchHandler1(e: TouchEvent) {
 
     if (fullscreen === false) {
@@ -81,8 +89,9 @@ function touchHandler1(e: TouchEvent) {
         fullscreen = true;
     }
     if (e.touches) {
-        const playerX = e.touches[0].pageX - canvas.offsetLeft;
-        const playerY = e.touches[0].pageY - canvas.offsetTop;
+        const pos = getMousePos(canvas, e);
+        const playerX = pos.x;
+        const playerY = pos.y;
         console.log('start x: ' + playerX + ', y: ' + playerY);
         e.preventDefault();
         e.stopPropagation();
@@ -131,13 +140,6 @@ function touchHandler1(e: TouchEvent) {
             }
         }
 
-    }
-}
-
-function touchHandler(e) {
-    if (e.touches) {
-        const playerX = e.touches[0].pageX - canvas.offsetLeft;
-        const playerY = e.touches[0].pageY - canvas.offsetTop;
     }
 }
 
