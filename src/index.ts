@@ -285,7 +285,7 @@ function draw(): void {
     }
     context.setTransform(1, 0, 0, 1, 0, 0);
 
-    futureShape.drawAt(context, new Position(640 / 2 + (12 * 16) / 2 + 16, 12+16));
+    futureShape.drawAt(context, new Position(640 / 2 + (12 * 16) / 2 + 16, 12 + 16));
 
     drawTouchButtons();
 

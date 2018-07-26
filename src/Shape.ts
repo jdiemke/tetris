@@ -30,13 +30,12 @@ export class Shape {
                 const num: number = this.tiles[y][x];
                 if (num === 1) {
                     context.drawImage(this.image, 16 * this.spriteId, 0, 16, 16,
-                        pos.x + x * 16, pos.y  + y * 16, 16, 16
+                        pos.x + x * 16, pos.y + y * 16, 16, 16
                     );
                 }
             }
         }
     }
-
 
     public rotate(): void {
         const temp: Array<Array<number>> = new Array<Array<number>>(this.tiles[0].length);
