@@ -42,9 +42,11 @@ const context: CanvasRenderingContext2D = canvas.getContext('2d');
 let field: Playfield;
 
 let shape: Shape;
+let futureShape: Shape;
 const image = new Image();
 image.onload = () => {
     shape = new ShapeSpawner().getNextShape(image);
+    futureShape = new ShapeSpawner().getNextShape(image);
     field = new Playfield(10, 20, image);
     requestAnimationFrame(() => draw());
 
@@ -125,7 +127,8 @@ function touchHandler1(e: TouchEvent) {
             soundManager.play(Sound.DROP);
             shape.position.y -= 1;
             field.setBlocks(shape);
-            shape = new ShapeSpawner().getNextShape(image);
+            shape = futureShape;
+            futureShape = new ShapeSpawner().getNextShape(image);
             if (field.removeFullRows()) {
                 soundManager.play(Sound.REMOVE_ROWS);
             }
@@ -179,7 +182,8 @@ document.addEventListener('keydown', (event) => {
         soundManager.play(Sound.DROP);
         shape.position.y -= 1;
         field.setBlocks(shape);
-        shape = new ShapeSpawner().getNextShape(image);
+        shape = futureShape;
+        futureShape = new ShapeSpawner().getNextShape(image);
         if (field.removeFullRows()) {
             soundManager.play(Sound.REMOVE_ROWS);
         }
@@ -232,7 +236,8 @@ function draw(): void {
                 soundManager.play(Sound.DROP);
                 shape.position.y -= 1;
                 field.setBlocks(shape);
-                shape = new ShapeSpawner().getNextShape(image);
+                shape = futureShape;
+                futureShape = new ShapeSpawner().getNextShape(image);
                 if (field.removeFullRows()) {
                     soundManager.play(Sound.REMOVE_ROWS);
                 }
@@ -249,7 +254,8 @@ function draw(): void {
                 soundManager.play(Sound.DROP);
                 shape.position.y -= 1;
                 field.setBlocks(shape);
-                shape = new ShapeSpawner().getNextShape(image);
+                shape = futureShape;
+                futureShape = new ShapeSpawner().getNextShape(image);
                 if (field.removeFullRows()) {
                     soundManager.play(Sound.REMOVE_ROWS);
                 }
@@ -277,7 +283,16 @@ function draw(): void {
     if (shape !== null) {
         shape.draw(context);
     }
+    context.setTransform(1, 0, 0, 1, 0, 0);
 
+    futureShape.drawAt(context, new Position(640 / 2 + (12 * 16) / 2 + 16, 12+16));
+
+    drawTouchButtons();
+
+    requestAnimationFrame(() => draw());
+}
+
+function drawTouchButtons(): void {
     context.setTransform(1, 0, 0, 1, 0, 0);
 
     context.beginPath();
@@ -307,6 +322,4 @@ function draw(): void {
     context.lineWidth = 3;
     context.strokeStyle = '#bbbbbb';
     context.stroke();
-
-    requestAnimationFrame(() => draw());
 }
