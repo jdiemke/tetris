@@ -6,7 +6,7 @@
 [![GitHub license](https://img.shields.io/github/license/jdiemke/tetris.svg)](https://github.com/jdiemke/tetris/blob/master/LICENSE)
 [![Twitter](https://img.shields.io/twitter/url/https/github.com/jdiemke/tetris.svg?style=social)](https://twitter.com/intent/tweet?text=Wow:&url=https%3A%2F%2Fgithub.com%2Fjdiemke%2Ftetris)
 
-HTML5 Tetris clone.
+A Tetris clone written in HTML5 and TypesScript.
 
 ## Demo
 
