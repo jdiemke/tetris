@@ -24,6 +24,19 @@ export class Shape {
         }
     }
 
+    public drawAt(context: CanvasRenderingContext2D, pos: Position): void {
+        for (let y: number = 0; y < this.tiles.length; y++) {
+            for (let x: number = 0; x < this.tiles[y].length; x++) {
+                const num: number = this.tiles[y][x];
+                if (num === 1) {
+                    context.drawImage(this.image, 16 * this.spriteId, 0, 16, 16,
+                        pos.x + x * 16, pos.y + y * 16, 16, 16
+                    );
+                }
+            }
+        }
+    }
+
     public rotate(): void {
         const temp: Array<Array<number>> = new Array<Array<number>>(this.tiles[0].length);
         for (let i = 0; i < this.tiles[0].length; i++) {
