@@ -15,6 +15,7 @@ import { SoundManager } from './sound/SoundManager';
 
 const gamepad: Gamepad2 = new Gamepad2();
 const soundManager: SoundManager = new SoundManager();
+let score: number = 0;
 
 soundManager.loadSound(Sound.DROP, dropSound);
 soundManager.loadSound(Sound.REMOVE_ROWS, removalSound);
@@ -35,6 +36,9 @@ canvas.style.cssText = 'image-rendering: optimizeSpeed;' + // FireFox < 6.0
     'image-rendering: -webkit-optimize-contrast;' + // Safari
     'image-rendering: pixelated; ' + // Future browsers
     '-ms-interpolation-mode: nearest-neighbor;'; // IE
+
+canvas.style.width = `${width * 2}px`;
+canvas.style.height = `${height * 2}px`;
 document.body.appendChild(canvas);
 
 const context: CanvasRenderingContext2D = canvas.getContext('2d');
@@ -49,7 +53,6 @@ image.onload = () => {
     futureShape = new ShapeSpawner().getNextShape(image);
     field = new Playfield(10, 20, image);
     requestAnimationFrame(() => draw());
-
 };
 image.src = Tiles;
 
@@ -129,7 +132,10 @@ function touchHandler1(e: TouchEvent) {
             field.setBlocks(shape);
             shape = futureShape;
             futureShape = new ShapeSpawner().getNextShape(image);
-            if (field.removeFullRows()) {
+            if (field.hasFullRows()) {
+                const fullRows: number = field.getNumberOfFullRows();
+                updateScore(0, fullRows);
+                field.removeFullRows();
                 soundManager.play(Sound.REMOVE_ROWS);
             }
 
@@ -149,7 +155,7 @@ function touchHandler1(e: TouchEvent) {
 document.addEventListener('keydown', (event) => {
 
     if (event.keyCode === 70) {
-        FullscreenUtils.fullscreen(document.documentElement);
+        FullscreenUtils.fullscreen(canvas);
     }
 
     if (event.keyCode === 37) {
@@ -174,7 +180,39 @@ document.addEventListener('keydown', (event) => {
         }
     }
 
+    // rotate counter clockwhise: y
+    if (event.keyCode === 89) {
+        const oldTiles = shape.tiles;
+        shape.rotate();
+        shape.rotate();
+        shape.rotate();
+        if (field.collides(shape)) {
+            shape.tiles = oldTiles;
+        } else {
+            soundManager.play(Sound.ROTATION);
+        }
+    }
+
+    // soft drop: arrow down
     if (event.keyCode === 40) {
+        shape.position.y += 1;
+        if (field.collides(shape)) {
+            soundManager.play(Sound.DROP);
+            shape.position.y -= 1;
+            field.setBlocks(shape);
+            shape = futureShape;
+            futureShape = new ShapeSpawner().getNextShape(image);
+            if (field.hasFullRows()) {
+                const fullRows: number = field.getNumberOfFullRows();
+                updateScore(0, fullRows);
+                field.removeFullRows();
+                soundManager.play(Sound.REMOVE_ROWS);
+            }
+        }
+    }
+
+    // hard drop: space
+    if (event.keyCode === 32) {
         do {
             shape.position.y += 1;
         } while (!field.collides(shape));
@@ -184,11 +222,37 @@ document.addEventListener('keydown', (event) => {
         field.setBlocks(shape);
         shape = futureShape;
         futureShape = new ShapeSpawner().getNextShape(image);
-        if (field.removeFullRows()) {
+        if (field.hasFullRows()) {
+            const fullRows: number = field.getNumberOfFullRows();
+            updateScore(0, fullRows);
+            field.removeFullRows();
             soundManager.play(Sound.REMOVE_ROWS);
         }
     }
 });
+
+// uses original nintendo scoring system used in NES, GB and SNES versions
+function updateScore(level: number, numLines: number): void {
+
+    let lineScore: number = 0;
+
+    switch (numLines) {
+        case 1:
+            lineScore = 40;
+            break;
+        case 2:
+            lineScore = 100;
+            break;
+        case 3:
+            lineScore = 300;
+            break;
+        case 4:
+            lineScore = 1200;
+            break;
+    }
+
+    score += lineScore * (level + 1);
+}
 
 let inputElapsedTime = Date.now();
 
@@ -238,7 +302,10 @@ function draw(): void {
                 field.setBlocks(shape);
                 shape = futureShape;
                 futureShape = new ShapeSpawner().getNextShape(image);
-                if (field.removeFullRows()) {
+                if (field.hasFullRows()) {
+                    const fullRows: number = field.getNumberOfFullRows();
+                    updateScore(0, fullRows);
+                    field.removeFullRows();
                     soundManager.play(Sound.REMOVE_ROWS);
                 }
             }
@@ -256,7 +323,10 @@ function draw(): void {
                 field.setBlocks(shape);
                 shape = futureShape;
                 futureShape = new ShapeSpawner().getNextShape(image);
-                if (field.removeFullRows()) {
+                if (field.hasFullRows()) {
+                    const fullRows: number = field.getNumberOfFullRows();
+                    updateScore(0, fullRows);
+                    field.removeFullRows();
                     soundManager.play(Sound.REMOVE_ROWS);
                 }
             }
@@ -288,6 +358,10 @@ function draw(): void {
     futureShape.drawAt(context, new Position(640 / 2 + (12 * 16) / 2 + 16, 12 + 16));
 
     drawTouchButtons();
+
+    context.font = '30px Arial';
+    context.fillStyle = 'red';
+    context.fillText('Score: ' + score, 30, 50);
 
     requestAnimationFrame(() => draw());
 }

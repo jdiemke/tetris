@@ -39,6 +39,26 @@ export class Playfield {
         return removal;
     }
 
+    public getNumberOfFullRows(): number {
+        let count: number = 0;
+        for (let y: number = 0; y < this.height; y++) {
+            if (this.isFullRow(y)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public hasFullRows(): boolean {
+        for (let y: number = 0; y < this.height; y++) {
+            if (this.isFullRow(y)) {
+                return true;
+
+            }
+        }
+        return false;
+    }
+
     public draw(context: CanvasRenderingContext2D): void {
         context.translate(640 / 2 - (12 * 16) / 2, 12);
 
