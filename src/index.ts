@@ -61,104 +61,6 @@ image.src = Tiles;
 
 let elapsedTime: number = Date.now();
 
-canvas.addEventListener('touchstart', touchHandler1);
-canvas.addEventListener('touchend', touchHandler12);
-
-function touchHandler12(e) {
-    touchLeft = false;
-    touchRight = false;
-}
-
-function inside(x: number, y: number, xcent: number, ycent: number, radius: number): boolean {
-    const xdiff = x - xcent;
-    const ydiff = y - ycent;
-    const length = Math.sqrt(xdiff * xdiff + ydiff * ydiff);
-
-    return length < radius;
-}
-
-const startPos: Position = new Position(0, 0);
-let touchLeft = false;
-let touchRight = false;
-let fullscreen = false;
-
-function getMousePos(canv: HTMLCanvasElement, evt: TouchEvent) {
-    const rect = canvas.getBoundingClientRect();
-    return {
-        x: (evt.touches[0].clientX - rect.left) / (rect.right - rect.left) * canvas.width,
-        y: (evt.touches[0].clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
-    };
-}
-
-function touchHandler1(e: TouchEvent) {
-
-    if (fullscreen === false) {
-        FullscreenUtils.fullscreen(document.documentElement);
-        fullscreen = true;
-    }
-    if (e.touches) {
-        const pos = getMousePos(canvas, e);
-        const playerX = pos.x;
-        const playerY = pos.y;
-        console.log('start x: ' + playerX + ', y: ' + playerY);
-        e.preventDefault();
-        e.stopPropagation();
-        startPos.x = playerX;
-        startPos.y = playerY;
-        console.log(playerX);
-
-        if (inside(playerX, playerY, 640 - 50 - 10, 360 - 50 - 10, 50)) {
-            const oldTiles = shape.tiles;
-            shape.rotate();
-            if (field.collides(shape)) {
-                shape.tiles = oldTiles;
-            } else {
-                soundManager.play(Sound.ROTATION);
-            }
-        }
-
-        if (inside(playerX, playerY, 50 + 10, 360 - 50 - 10, 50)) {
-            console.log('left ');
-            shape.position.x -= 1;
-            if (field.collides(shape)) {
-                shape.position.x += 1;
-            }
-        }
-
-        if (inside(playerX, playerY, 640 - 100 - 50 - 20, 360 - 50 - 10, 50)) {
-            do {
-                shape.position.y += 1;
-            } while (!field.collides(shape));
-
-            soundManager.play(Sound.DROP);
-            shape.position.y -= 1;
-            field.setBlocks(shape);
-            shape = futureShape;
-            futureShape = new ShapeSpawner().getNextShape(image);
-            if (field.hasFullRows()) {
-                const fullRows: number = field.getNumberOfFullRows();
-                updateScore(level, fullRows);
-                field.removeFullRows();
-                soundManager.play(Sound.REMOVE_ROWS);
-                lineCounter += fullRows;
-                const firstLevelStep: number = Math.min(startLevel * 10 + 10, Math.max(100, startLevel * 10 - 50));
-                level = Math.floor(Math.max(lineCounter - firstLevelStep, 0) / 10) +
-                    (lineCounter >= firstLevelStep ? 1 : 0);
-            }
-
-        }
-
-        if (inside(playerX, playerY, 50 + 10 + 100 + 10, 360 - 50 - 10, 50)) {
-            console.log('right ');
-            shape.position.x += 1;
-            if (field.collides(shape)) {
-                shape.position.x -= 1;
-            }
-        }
-
-    }
-}
-
 document.addEventListener('keydown', (event) => {
 
     if (event.keyCode === 70) {
@@ -202,24 +104,7 @@ document.addEventListener('keydown', (event) => {
 
     // soft drop: arrow down
     if (event.keyCode === 40) {
-        shape.position.y += 1;
-        if (field.collides(shape)) {
-            soundManager.play(Sound.DROP);
-            shape.position.y -= 1;
-            field.setBlocks(shape);
-            shape = futureShape;
-            futureShape = new ShapeSpawner().getNextShape(image);
-            if (field.hasFullRows()) {
-                const fullRows: number = field.getNumberOfFullRows();
-                updateScore(level, fullRows);
-                field.removeFullRows();
-                soundManager.play(Sound.REMOVE_ROWS);
-                lineCounter += fullRows;
-                const firstLevelStep: number = Math.min(startLevel * 10 + 10, Math.max(100, startLevel * 10 - 50));
-                level = Math.floor(Math.max(lineCounter - firstLevelStep, 0) / 10) +
-                    (lineCounter >= firstLevelStep ? 1 : 0);
-            }
-        }
+        moveDown();
     }
 
     // hard drop: space
@@ -295,14 +180,14 @@ function draw(): void {
     }
 
     if (Date.now() > inputElapsedTime + 100) {
-        if (gamepad.isLeft(0, -1) || touchLeft) {
+        if (gamepad.isLeft(0, -1)) {
             shape.position.x -= 1;
             if (field.collides(shape)) {
                 shape.position.x += 1;
             }
         }
 
-        if (gamepad.isLeft(0, 1) || touchRight) {
+        if (gamepad.isLeft(0, 1)) {
             shape.position.x += 1;
             if (field.collides(shape)) {
                 shape.position.x -= 1;
@@ -335,25 +220,7 @@ function draw(): void {
 
     if (shape !== null) {
         if (Date.now() > elapsedTime + getTetrominoSpeedInMillis(level)) {
-            shape.position.y += 1;
-            if (field.collides(shape)) {
-                soundManager.play(Sound.DROP);
-                shape.position.y -= 1;
-                field.setBlocks(shape);
-                shape = futureShape;
-                futureShape = new ShapeSpawner().getNextShape(image);
-                if (field.hasFullRows()) {
-                    const fullRows: number = field.getNumberOfFullRows();
-                    updateScore(level, fullRows);
-                    field.removeFullRows();
-                    soundManager.play(Sound.REMOVE_ROWS);
-                    lineCounter += fullRows;
-
-                    const firstLevelStep: number = Math.min(startLevel * 10 + 10, Math.max(100, startLevel * 10 - 50));
-                    level = Math.floor(Math.max(lineCounter - firstLevelStep, 0) / 10) +
-                        (lineCounter >= firstLevelStep ? 1 : 0);
-                }
-            }
+            moveDown();
             elapsedTime = Date.now();
         }
     }
@@ -381,8 +248,6 @@ function draw(): void {
 
     futureShape.drawAt(context, new Position(640 / 2 + (12 * 16) / 2 + 16, 12 + 16));
 
-    drawTouchButtons();
-
     context.font = '30px Arial';
     context.fillStyle = 'red';
     context.fillText('Score: ' + score, 30, 50);
@@ -390,6 +255,28 @@ function draw(): void {
     context.fillText('Lines: ' + lineCounter, 30, 50 + 30 + 30);
 
     requestAnimationFrame(() => draw());
+}
+
+function moveDown(): void {
+    shape.position.y += 1;
+    if (field.collides(shape)) {
+        soundManager.play(Sound.DROP);
+        shape.position.y -= 1;
+        field.setBlocks(shape);
+        shape = futureShape;
+        futureShape = new ShapeSpawner().getNextShape(image);
+        if (field.hasFullRows()) {
+            const fullRows: number = field.getNumberOfFullRows();
+            updateScore(level, fullRows);
+            field.removeFullRows();
+            soundManager.play(Sound.REMOVE_ROWS);
+            lineCounter += fullRows;
+
+            const firstLevelStep: number = Math.min(startLevel * 10 + 10, Math.max(100, startLevel * 10 - 50));
+            level = Math.floor(Math.max(lineCounter - firstLevelStep, 0) / 10) +
+                (lineCounter >= firstLevelStep ? 1 : 0);
+        }
+    }
 }
 
 function getTetrominoSpeedInMillis(currentLevel: number): number {
@@ -433,36 +320,4 @@ function convertLevelToFramesPerGridCell(currentLevel: number): number {
     } else if (currentLevel >= 29) {
         return 1;
     }
-}
-
-function drawTouchButtons(): void {
-    context.setTransform(1, 0, 0, 1, 0, 0);
-
-    context.beginPath();
-    context.arc(50 + 10, 360 - 50 - 10, 50, 0, Math.PI * 2, true);
-
-    context.lineWidth = 3;
-    context.strokeStyle = '#bbbbbb';
-    context.stroke();
-
-    context.beginPath();
-    context.arc(50 + 10 + 100 + 10, 360 - 50 - 10, 50, 0, Math.PI * 2, true);
-
-    context.lineWidth = 3;
-    context.strokeStyle = '#bbbbbb';
-    context.stroke();
-
-    context.beginPath();
-    context.arc(640 - 50 - 10, 360 - 50 - 10, 50, 0, Math.PI * 2, true);
-
-    context.lineWidth = 3;
-    context.strokeStyle = '#bbbbbb';
-    context.stroke();
-
-    context.beginPath();
-    context.arc(640 - 100 - 50 - 20, 360 - 50 - 10, 50, 0, Math.PI * 2, true);
-
-    context.lineWidth = 3;
-    context.strokeStyle = '#bbbbbb';
-    context.stroke();
 }
