@@ -11,14 +11,16 @@ import removalSound from './assets/line-removal.mp3';
 import dropSound from './assets/slow-hit.mp3';
 
 import { Gamepad2 } from './Gamepad';
-import { Position } from './Position';
+
 
 export class TetrisGame {
 
-    private score: number = 0;
+    public score: number = 0;
+
+    public level: number = 0;
+    public lineCounter: number = 0;
+
     private startLevel: number = 0;
-    private level: number = 0;
-    private lineCounter: number = 0;
 
     private rotatePressed: boolean = false;
     private inputElapsedTime = Date.now();
@@ -48,9 +50,68 @@ export class TetrisGame {
             this.shape = new ShapeSpawner().getNextShape(this.image);
             this.futureShape = new ShapeSpawner().getNextShape(this.image);
             this.field = new Playfield(10, 20, this.image);
-            requestAnimationFrame(() => this.draw());
         };
         this.image.src = Tiles;
+    }
+
+    public update(): void {
+        if (this.gamepad.isButtonPressed(0) && !this.rotatePressed) {
+            this.rotatePressed = true;
+            this.rotateClockwise();
+        }
+
+        if (!this.gamepad.isButtonPressed(0)) {
+            this.rotatePressed = false;
+        }
+
+        if (Date.now() > this.inputElapsedTime + 100) {
+
+            if (this.gamepad.isLeft(0, -1)) {
+                this.moveLeft();
+            }
+
+            if (this.gamepad.isLeft(0, 1)) {
+                this.moveRight();
+            }
+
+            if (this.gamepad.isLeft(1, 1)) {
+                this.moveDown();
+            }
+
+            this.inputElapsedTime = Date.now();
+        }
+
+        if (this.shape !== null) {
+            if (Date.now() > this.elapsedTime + this.getTetrominoSpeedInMillis(this.level)) {
+                this.moveDown();
+                this.elapsedTime = Date.now();
+            }
+        }
+    }
+
+    public getField(): Playfield {
+        return this.field;
+    }
+
+    public getShape(): Shape {
+        return this.shape;
+    }
+
+    public getFuture(): Shape {
+        return this.futureShape;
+    }
+
+    public getGhost(): Shape {
+        const ghost = new Shape(this.shape.tiles, this.image, 9);
+        ghost.position.y = this.shape.position.y;
+        ghost.position.x = this.shape.position.x;
+        do {
+            ghost.position.y += 1;
+        } while (!this.field.collides(ghost));
+
+        ghost.position.y -= 1;
+
+        return ghost;
     }
 
     public moveLeft(): void {
@@ -156,87 +217,6 @@ export class TetrisGame {
         }
 
         this.score += lineScore * (currentLevel + 1);
-    }
-
-    private drawNextShape(): void {
-        this.context.setTransform(1, 0, 0, 1, 0, 0);
-        this.futureShape.drawAt(this.context, new Position(640 / 2 + (12 * 16) / 2 + 16, 12 + 16));
-    }
-
-    private drawStatistics(): void {
-        this.context.font = '30px Arial';
-        this.context.fillStyle = 'red';
-        this.context.fillText('Score: ' + this.score, 30, 50);
-        this.context.fillText('Level: ' + this.level, 30, 50 + 30);
-        this.context.fillText('Lines: ' + this.lineCounter, 30, 50 + 30 + 30);
-    }
-
-    private drawGhost(): void {
-        const ghost = new Shape(this.shape.tiles, this.image, 9);
-        ghost.position.y = this.shape.position.y;
-        ghost.position.x = this.shape.position.x;
-        do {
-            ghost.position.y += 1;
-        } while (!this.field.collides(ghost));
-
-        ghost.position.y -= 1;
-
-        this.context.globalAlpha = 0.24;
-        ghost.draw(this.context);
-        this.context.globalAlpha = 1;
-    }
-
-    private draw(): void {
-        this.context.setTransform(1, 0, 0, 1, 0, 0);
-
-        this.context.fillStyle = '#222222';
-        this.context.fillRect(0, 0, this.width, this.height);
-
-        if (this.gamepad.isButtonPressed(0) && !this.rotatePressed) {
-            this.rotatePressed = true;
-            this.rotateClockwise();
-        }
-
-        if (!this.gamepad.isButtonPressed(0)) {
-            this.rotatePressed = false;
-        }
-
-        if (Date.now() > this.inputElapsedTime + 100) {
-
-            if (this.gamepad.isLeft(0, -1)) {
-                this.moveLeft();
-            }
-
-            if (this.gamepad.isLeft(0, 1)) {
-                this.moveRight();
-            }
-
-            if (this.gamepad.isLeft(1, 1)) {
-                this.moveDown();
-            }
-
-            this.inputElapsedTime = Date.now();
-        }
-
-        if (this.shape !== null) {
-            if (Date.now() > this.elapsedTime + this.getTetrominoSpeedInMillis(this.level)) {
-                this.moveDown();
-                this.elapsedTime = Date.now();
-            }
-        }
-
-        this.field.draw(this.context);
-
-        this.drawGhost();
-
-        if (this.shape !== null) {
-            this.shape.draw(this.context);
-        }
-
-        this.drawNextShape();
-        this.drawStatistics();
-
-        requestAnimationFrame(() => this.draw());
     }
 
     private getTetrominoSpeedInMillis(currentLevel: number): number {

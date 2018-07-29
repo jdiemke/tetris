@@ -1,4 +1,6 @@
 import { FullscreenUtils } from './fullscreen/FullscreenUtils';
+import { Position } from './Position';
+import { Shape } from './Shape';
 import { TetrisGame } from './TetrisGame';
 
 const canvas: HTMLCanvasElement = document.createElement('canvas');
@@ -21,6 +23,46 @@ document.body.appendChild(canvas);
 const context: CanvasRenderingContext2D = canvas.getContext('2d');
 
 const tetris: TetrisGame = new TetrisGame(context);
+
+requestAnimationFrame(() => draw());
+
+function draw(): void {
+    context.setTransform(1, 0, 0, 1, 0, 0);
+
+    context.fillStyle = '#222222';
+    context.fillRect(0, 0, 640, 360);
+
+    tetris.update();
+
+    tetris.getField().draw(context);
+
+    context.globalAlpha = 0.24;
+    tetris.getGhost().draw(context);
+    context.globalAlpha = 1;
+
+    const shape: Shape = tetris.getShape();
+    if (shape !== null) {
+        shape.draw(context);
+    }
+
+    drawNextShape();
+    drawStatistics();
+
+    requestAnimationFrame(() => draw());
+}
+
+function drawNextShape(): void {
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    tetris.getFuture().drawAt(context, new Position(640 / 2 + (12 * 16) / 2 + 16, 12 + 16));
+}
+
+function drawStatistics(): void {
+    context.font = '30px Arial';
+    context.fillStyle = 'red';
+    context.fillText('Score: ' + tetris.score, 30, 50);
+    context.fillText('Level: ' + tetris.level, 30, 50 + 30);
+    context.fillText('Lines: ' + tetris.lineCounter, 30, 50 + 30 + 30);
+}
 
 document.addEventListener('keydown', (event: KeyboardEvent) => {
 
