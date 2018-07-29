@@ -61,45 +61,27 @@ image.src = Tiles;
 
 let elapsedTime: number = Date.now();
 
-document.addEventListener('keydown', (event) => {
+document.addEventListener('keydown', (event: KeyboardEvent) => {
 
     if (event.keyCode === 70) {
         FullscreenUtils.fullscreen(canvas);
     }
 
     if (event.keyCode === 37) {
-        shape.position.x -= 1;
-        if (field.collides(shape)) {
-            shape.position.x += 1;
-        }
+        moveLeft();
     }
+
     if (event.keyCode === 39) {
-        shape.position.x += 1;
-        if (field.collides(shape)) {
-            shape.position.x -= 1;
-        }
+        moveRight();
     }
+
     if (event.keyCode === 38) {
-        const oldTiles = shape.tiles;
-        shape.rotate();
-        if (field.collides(shape)) {
-            shape.tiles = oldTiles;
-        } else {
-            soundManager.play(Sound.ROTATION);
-        }
+        rotateClockwise();
     }
 
     // rotate counter clockwhise: y
     if (event.keyCode === 89) {
-        const oldTiles = shape.tiles;
-        shape.rotate();
-        shape.rotate();
-        shape.rotate();
-        if (field.collides(shape)) {
-            shape.tiles = oldTiles;
-        } else {
-            soundManager.play(Sound.ROTATION);
-        }
+        rotateCounterclockwise();
     }
 
     // soft drop: arrow down
@@ -109,26 +91,9 @@ document.addEventListener('keydown', (event) => {
 
     // hard drop: space
     if (event.keyCode === 32) {
-        do {
-            shape.position.y += 1;
-        } while (!field.collides(shape));
-
-        soundManager.play(Sound.DROP);
-        shape.position.y -= 1;
-        field.setBlocks(shape);
-        shape = futureShape;
-        futureShape = new ShapeSpawner().getNextShape(image);
-        if (field.hasFullRows()) {
-            const fullRows: number = field.getNumberOfFullRows();
-            updateScore(level, fullRows);
-            field.removeFullRows();
-            soundManager.play(Sound.REMOVE_ROWS);
-            lineCounter += fullRows;
-            const firstLevelStep: number = Math.min(startLevel * 10 + 10, Math.max(100, startLevel * 10 - 50));
-            level = Math.floor(Math.max(lineCounter - firstLevelStep, 0) / 10) +
-                (lineCounter >= firstLevelStep ? 1 : 0);
-        }
+        hardDrop();
     }
+
 });
 
 // uses original nintendo scoring system used in NES, GB and SNES versions
@@ -166,13 +131,7 @@ function draw(): void {
 
     if (gamepad.isButtonPressed(0) && !rotatePressed) {
         rotatePressed = true;
-        const oldTiles = shape.tiles;
-        shape.rotate();
-        if (field.collides(shape)) {
-            shape.tiles = oldTiles;
-        } else {
-            soundManager.play(Sound.ROTATION);
-        }
+        rotateClockwise();
     }
 
     if (!gamepad.isButtonPressed(0)) {
@@ -180,39 +139,17 @@ function draw(): void {
     }
 
     if (Date.now() > inputElapsedTime + 100) {
+
         if (gamepad.isLeft(0, -1)) {
-            shape.position.x -= 1;
-            if (field.collides(shape)) {
-                shape.position.x += 1;
-            }
+            moveLeft();
         }
 
         if (gamepad.isLeft(0, 1)) {
-            shape.position.x += 1;
-            if (field.collides(shape)) {
-                shape.position.x -= 1;
-            }
+            moveRight();
         }
 
         if (gamepad.isLeft(1, 1)) {
-            shape.position.y += 1;
-            if (field.collides(shape)) {
-                soundManager.play(Sound.DROP);
-                shape.position.y -= 1;
-                field.setBlocks(shape);
-                shape = futureShape;
-                futureShape = new ShapeSpawner().getNextShape(image);
-                if (field.hasFullRows()) {
-                    const fullRows: number = field.getNumberOfFullRows();
-                    updateScore(level, fullRows);
-                    field.removeFullRows();
-                    soundManager.play(Sound.REMOVE_ROWS);
-                    lineCounter += fullRows;
-                    const firstLevelStep: number = Math.min(startLevel * 10 + 10, Math.max(100, startLevel * 10 - 50));
-                    level = Math.floor(Math.max(lineCounter - firstLevelStep, 0) / 10) +
-                        (lineCounter >= firstLevelStep ? 1 : 0);
-                }
-            }
+            moveDown();
         }
 
         inputElapsedTime = Date.now();
@@ -227,7 +164,32 @@ function draw(): void {
 
     field.draw(context);
 
-    // draw ghost
+    drawGhost();
+
+    if (shape !== null) {
+        shape.draw(context);
+    }
+
+    drawNextShape();
+    drawStatistics();
+
+    requestAnimationFrame(() => draw());
+}
+
+function drawNextShape(): void {
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    futureShape.drawAt(context, new Position(640 / 2 + (12 * 16) / 2 + 16, 12 + 16));
+}
+
+function drawStatistics(): void {
+    context.font = '30px Arial';
+    context.fillStyle = 'red';
+    context.fillText('Score: ' + score, 30, 50);
+    context.fillText('Level: ' + level, 30, 50 + 30);
+    context.fillText('Lines: ' + lineCounter, 30, 50 + 30 + 30);
+}
+
+function drawGhost(): void {
     const ghost = new Shape(shape.tiles, image, 9);
     ghost.position.y = shape.position.y;
     ghost.position.x = shape.position.x;
@@ -240,21 +202,42 @@ function draw(): void {
     context.globalAlpha = 0.24;
     ghost.draw(context);
     context.globalAlpha = 1;
+}
 
-    if (shape !== null) {
-        shape.draw(context);
+function moveLeft(): void {
+    shape.position.x -= 1;
+    if (field.collides(shape)) {
+        shape.position.x += 1;
     }
-    context.setTransform(1, 0, 0, 1, 0, 0);
+}
 
-    futureShape.drawAt(context, new Position(640 / 2 + (12 * 16) / 2 + 16, 12 + 16));
+function moveRight(): void {
+    shape.position.x += 1;
+    if (field.collides(shape)) {
+        shape.position.x -= 1;
+    }
+}
 
-    context.font = '30px Arial';
-    context.fillStyle = 'red';
-    context.fillText('Score: ' + score, 30, 50);
-    context.fillText('Level: ' + level, 30, 50 + 30);
-    context.fillText('Lines: ' + lineCounter, 30, 50 + 30 + 30);
+function rotateCounterclockwise(): void {
+    const oldTiles = shape.tiles;
+    shape.rotate();
+    shape.rotate();
+    shape.rotate();
+    if (field.collides(shape)) {
+        shape.tiles = oldTiles;
+    } else {
+        soundManager.play(Sound.ROTATION);
+    }
+}
 
-    requestAnimationFrame(() => draw());
+function rotateClockwise(): void {
+    const oldTiles = shape.tiles;
+    shape.rotate();
+    if (field.collides(shape)) {
+        shape.tiles = oldTiles;
+    } else {
+        soundManager.play(Sound.ROTATION);
+    }
 }
 
 function moveDown(): void {
@@ -276,6 +259,28 @@ function moveDown(): void {
             level = Math.floor(Math.max(lineCounter - firstLevelStep, 0) / 10) +
                 (lineCounter >= firstLevelStep ? 1 : 0);
         }
+    }
+}
+
+function hardDrop(): void {
+    do {
+        shape.position.y += 1;
+    } while (!field.collides(shape));
+
+    soundManager.play(Sound.DROP);
+    shape.position.y -= 1;
+    field.setBlocks(shape);
+    shape = futureShape;
+    futureShape = new ShapeSpawner().getNextShape(image);
+    if (field.hasFullRows()) {
+        const fullRows: number = field.getNumberOfFullRows();
+        updateScore(level, fullRows);
+        field.removeFullRows();
+        soundManager.play(Sound.REMOVE_ROWS);
+        lineCounter += fullRows;
+        const firstLevelStep: number = Math.min(startLevel * 10 + 10, Math.max(100, startLevel * 10 - 50));
+        level = Math.floor(Math.max(lineCounter - firstLevelStep, 0) / 10) +
+            (lineCounter >= firstLevelStep ? 1 : 0);
     }
 }
 
