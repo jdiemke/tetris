@@ -16,6 +16,9 @@ import { SoundManager } from './sound/SoundManager';
 const gamepad: Gamepad2 = new Gamepad2();
 const soundManager: SoundManager = new SoundManager();
 let score: number = 0;
+const startLevel: number = 0;
+let level: number = 0;
+let lineCounter: number = 0;
 
 soundManager.loadSound(Sound.DROP, dropSound);
 soundManager.loadSound(Sound.REMOVE_ROWS, removalSound);
@@ -134,9 +137,13 @@ function touchHandler1(e: TouchEvent) {
             futureShape = new ShapeSpawner().getNextShape(image);
             if (field.hasFullRows()) {
                 const fullRows: number = field.getNumberOfFullRows();
-                updateScore(0, fullRows);
+                updateScore(level, fullRows);
                 field.removeFullRows();
                 soundManager.play(Sound.REMOVE_ROWS);
+                lineCounter += fullRows;
+                const firstLevelStep: number = Math.min(startLevel * 10 + 10, Math.max(100, startLevel * 10 - 50));
+                level = Math.floor(Math.max(lineCounter - firstLevelStep, 0) / 10) +
+                    (lineCounter >= firstLevelStep ? 1 : 0);
             }
 
         }
@@ -204,9 +211,13 @@ document.addEventListener('keydown', (event) => {
             futureShape = new ShapeSpawner().getNextShape(image);
             if (field.hasFullRows()) {
                 const fullRows: number = field.getNumberOfFullRows();
-                updateScore(0, fullRows);
+                updateScore(level, fullRows);
                 field.removeFullRows();
                 soundManager.play(Sound.REMOVE_ROWS);
+                lineCounter += fullRows;
+                const firstLevelStep: number = Math.min(startLevel * 10 + 10, Math.max(100, startLevel * 10 - 50));
+                level = Math.floor(Math.max(lineCounter - firstLevelStep, 0) / 10) +
+                    (lineCounter >= firstLevelStep ? 1 : 0);
             }
         }
     }
@@ -224,15 +235,19 @@ document.addEventListener('keydown', (event) => {
         futureShape = new ShapeSpawner().getNextShape(image);
         if (field.hasFullRows()) {
             const fullRows: number = field.getNumberOfFullRows();
-            updateScore(0, fullRows);
+            updateScore(level, fullRows);
             field.removeFullRows();
             soundManager.play(Sound.REMOVE_ROWS);
+            lineCounter += fullRows;
+            const firstLevelStep: number = Math.min(startLevel * 10 + 10, Math.max(100, startLevel * 10 - 50));
+            level = Math.floor(Math.max(lineCounter - firstLevelStep, 0) / 10) +
+                (lineCounter >= firstLevelStep ? 1 : 0);
         }
     }
 });
 
 // uses original nintendo scoring system used in NES, GB and SNES versions
-function updateScore(level: number, numLines: number): void {
+function updateScore(currentLevel: number, numLines: number): void {
 
     let lineScore: number = 0;
 
@@ -251,7 +266,7 @@ function updateScore(level: number, numLines: number): void {
             break;
     }
 
-    score += lineScore * (level + 1);
+    score += lineScore * (currentLevel + 1);
 }
 
 let inputElapsedTime = Date.now();
@@ -304,9 +319,13 @@ function draw(): void {
                 futureShape = new ShapeSpawner().getNextShape(image);
                 if (field.hasFullRows()) {
                     const fullRows: number = field.getNumberOfFullRows();
-                    updateScore(0, fullRows);
+                    updateScore(level, fullRows);
                     field.removeFullRows();
                     soundManager.play(Sound.REMOVE_ROWS);
+                    lineCounter += fullRows;
+                    const firstLevelStep: number = Math.min(startLevel * 10 + 10, Math.max(100, startLevel * 10 - 50));
+                    level = Math.floor(Math.max(lineCounter - firstLevelStep, 0) / 10) +
+                        (lineCounter >= firstLevelStep ? 1 : 0);
                 }
             }
         }
@@ -315,7 +334,7 @@ function draw(): void {
     }
 
     if (shape !== null) {
-        if (Date.now() > elapsedTime + 500) {
+        if (Date.now() > elapsedTime + getTetrominoSpeedInMillis(level)) {
             shape.position.y += 1;
             if (field.collides(shape)) {
                 soundManager.play(Sound.DROP);
@@ -325,9 +344,14 @@ function draw(): void {
                 futureShape = new ShapeSpawner().getNextShape(image);
                 if (field.hasFullRows()) {
                     const fullRows: number = field.getNumberOfFullRows();
-                    updateScore(0, fullRows);
+                    updateScore(level, fullRows);
                     field.removeFullRows();
                     soundManager.play(Sound.REMOVE_ROWS);
+                    lineCounter += fullRows;
+
+                    const firstLevelStep: number = Math.min(startLevel * 10 + 10, Math.max(100, startLevel * 10 - 50));
+                    level = Math.floor(Math.max(lineCounter - firstLevelStep, 0) / 10) +
+                        (lineCounter >= firstLevelStep ? 1 : 0);
                 }
             }
             elapsedTime = Date.now();
@@ -362,8 +386,53 @@ function draw(): void {
     context.font = '30px Arial';
     context.fillStyle = 'red';
     context.fillText('Score: ' + score, 30, 50);
+    context.fillText('Level: ' + level, 30, 50 + 30);
+    context.fillText('Lines: ' + lineCounter, 30, 50 + 30 + 30);
 
     requestAnimationFrame(() => draw());
+}
+
+function getTetrominoSpeedInMillis(currentLevel: number): number {
+    return convertFrameToMilliseconds(convertLevelToFramesPerGridCell(currentLevel));
+}
+
+function convertFrameToMilliseconds(frames: number): number {
+    const NES_FPS: number = 60.098814;
+    return 1000 / NES_FPS * frames;
+}
+
+function convertLevelToFramesPerGridCell(currentLevel: number): number {
+    if (currentLevel === 0) {
+        return 48;
+    } else if (currentLevel === 1) {
+        return 43;
+    } else if (currentLevel === 2) {
+        return 38;
+    } else if (currentLevel === 3) {
+        return 33;
+    } else if (currentLevel === 4) {
+        return 28;
+    } else if (currentLevel === 5) {
+        return 23;
+    } else if (currentLevel === 6) {
+        return 18;
+    } else if (currentLevel === 7) {
+        return 13;
+    } else if (currentLevel === 8) {
+        return 8;
+    } else if (currentLevel === 9) {
+        return 6;
+    } else if (currentLevel >= 10 && currentLevel <= 12) {
+        return 5;
+    } else if (currentLevel >= 13 && currentLevel <= 15) {
+        return 4;
+    } else if (currentLevel >= 16 && currentLevel <= 18) {
+        return 3;
+    } else if (currentLevel >= 19 && currentLevel <= 28) {
+        return 2;
+    } else if (currentLevel >= 29) {
+        return 1;
+    }
 }
 
 function drawTouchButtons(): void {
