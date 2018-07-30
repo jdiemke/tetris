@@ -60,30 +60,21 @@ export class Playfield {
     }
 
     public draw(context: CanvasRenderingContext2D): void {
-        context.translate(640 / 2 - (12 * 16) / 2, 12);
 
-        for (let y: number = 0; y < this.height + 1; y++) {
-            for (let x: number = 0; x < this.width + 2; x++) {
-                this.drawSprite(context, x, y, 0);
-            }
-        }
-
-        context.translate(16, 0);
+        context.translate(96, 40);
 
         for (let y: number = 0; y < this.height; y++) {
             for (let x: number = 0; x < this.width; x++) {
                 const num: number = this.field[x + y * this.width];
                 if (num !== 0) {
                     this.drawSprite(context, x, y, num);
-                } else {
-                    this.drawSprite(context, x, y, 1);
                 }
             }
         }
     }
 
     public drawSprite(context: CanvasRenderingContext2D, x: number, y: number, sprite: number): void {
-        context.drawImage(this.image, 16 * sprite, 0, 16, 16, x * 16, y * 16, 16, 16);
+        context.drawImage(this.image, 8 * sprite, 0, 8, 8, x * 8, y * 8, 8, 8);
     }
 
     public collides(shape: Shape): boolean {
