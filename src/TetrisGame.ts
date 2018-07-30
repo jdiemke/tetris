@@ -1,7 +1,7 @@
 import { Playfield } from './Playfield';
 import { Shape } from './Shape';
 
-import Tiles from './assets/sprites.png';
+import Tiles from './assets/sprites2.png';
 import { ShapeSpawner } from './ShapeSpawner';
 import { Sound } from './sound/Sound';
 import { SoundManager } from './sound/SoundManager';
@@ -11,7 +11,6 @@ import removalSound from './assets/line-removal.mp3';
 import dropSound from './assets/slow-hit.mp3';
 
 import { Gamepad2 } from './Gamepad';
-
 
 export class TetrisGame {
 

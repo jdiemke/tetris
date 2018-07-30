@@ -16,8 +16,8 @@ export class Shape {
             for (let x: number = 0; x < this.tiles[y].length; x++) {
                 const num: number = this.tiles[y][x];
                 if (num === 1) {
-                    context.drawImage(this.image, 16 * this.spriteId, 0, 16, 16,
-                        this.position.x * 16 + x * 16, this.position.y * 16 + y * 16, 16, 16
+                    context.drawImage(this.image, 8 * this.spriteId, 0, 8, 8,
+                        this.position.x * 8 + x * 8, this.position.y * 8 + y * 8, 8, 8
                     );
                 }
             }
@@ -29,8 +29,8 @@ export class Shape {
             for (let x: number = 0; x < this.tiles[y].length; x++) {
                 const num: number = this.tiles[y][x];
                 if (num === 1) {
-                    context.drawImage(this.image, 16 * this.spriteId, 0, 16, 16,
-                        pos.x + x * 16, pos.y + y * 16, 16, 16
+                    context.drawImage(this.image, 8 * this.spriteId, 0, 8, 8,
+                        pos.x + x * 8, pos.y + y * 8, 8, 8
                     );
                 }
             }

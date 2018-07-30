@@ -1,11 +1,13 @@
+import background from './assets/background.png';
+import digits from './assets/digits.png';
 import { FullscreenUtils } from './fullscreen/FullscreenUtils';
 import { Position } from './Position';
 import { Shape } from './Shape';
 import { TetrisGame } from './TetrisGame';
 
 const canvas: HTMLCanvasElement = document.createElement('canvas');
-canvas.width = 640;
-canvas.height = 360;
+canvas.width = 256;
+canvas.height = 224;
 
 canvas.style.cssText = 'image-rendering: optimizeSpeed;' + // FireFox < 6.0
     'image-rendering: -moz-crisp-edges;' + // FireFox
@@ -16,11 +18,17 @@ canvas.style.cssText = 'image-rendering: optimizeSpeed;' + // FireFox < 6.0
     'image-rendering: pixelated; ' + // Future browsers
     '-ms-interpolation-mode: nearest-neighbor;'; // IE
 
-canvas.style.width = `${640 * 2}px`;
-canvas.style.height = `${360 * 2}px`;
+canvas.style.width = `${256 * 2}px`;
+canvas.style.height = `${224 * 2}px`;
 document.body.appendChild(canvas);
 
 const context: CanvasRenderingContext2D = canvas.getContext('2d');
+
+const image = new Image();
+image.src = background;
+
+const digitsImage = new Image();
+digitsImage.src = digits;
 
 const tetris: TetrisGame = new TetrisGame(context);
 
@@ -31,6 +39,7 @@ function draw(): void {
 
     context.fillStyle = '#222222';
     context.fillRect(0, 0, 640, 360);
+    context.drawImage(image, 0, 0, 256, 224, 0, 0, 256, 224);
 
     tetris.update();
 
@@ -53,15 +62,47 @@ function draw(): void {
 
 function drawNextShape(): void {
     context.setTransform(1, 0, 0, 1, 0, 0);
-    tetris.getFuture().drawAt(context, new Position(640 / 2 + (12 * 16) / 2 + 16, 12 + 16));
+
+    const shape = tetris.getFuture();
+    const height: number = shape.tiles.length * 8;
+    const width: number = shape.tiles[0].length * 8;
+    shape.drawAt(context, new Position(208 - width / 2, 124 - height / 2));
+}
+
+function pad(orig: string, length: number, char: string): string {
+    const leng: number = orig.length;
+    return char.repeat(Math.max(0, length - leng)) + orig;
 }
 
 function drawStatistics(): void {
-    context.font = '30px Arial';
-    context.fillStyle = 'red';
-    context.fillText('Score: ' + tetris.score, 30, 50);
-    context.fillText('Level: ' + tetris.level, 30, 50 + 30);
-    context.fillText('Lines: ' + tetris.lineCounter, 30, 50 + 30 + 30);
+
+    drawNum(152, 16, pad(tetris.lineCounter.toString(), 3, '0')); // 3
+    drawNum(192, 56, pad(tetris.score.toString(), 6, '0')); // 6
+    drawNum(192, 32, pad('31337', 6, '0')); // 3
+
+    drawNum(208, 160, pad(tetris.level.toString(), 2, '0')); // 2
+
+    drawNum(48, 88, pad('000', 3, '0')); // 3
+    drawNum(48, 88 + 16, pad('000', 3, '0')); // 3
+    drawNum(48, 88 + 16 + 16, pad('000', 3, '0')); // 3
+    drawNum(48, 88 + 16 + 16 + 16, pad('000', 3, '0')); // 3
+    drawNum(48, 88 + 16 + 16 + 16 + 16, pad('000', 3, '0')); // 3
+    drawNum(48, 88 + 16 + 16 + 16 + 16 + 16, pad('000', 3, '0')); // 3
+    drawNum(48, 88 + 16 + 16 + 16 + 16 + 16 + 16, pad('000', 3, '0')); // 3
+}
+
+function drawNum(x: number, y: number, num: string): void {
+    const myNum: string = '' + num;
+    for (let i: number = 0; i < myNum.length; i++) {
+        drawDigit(x + i * 8, y, myNum.charCodeAt(i));
+    }
+}
+
+function drawDigit(x: number, y: number, char: number): void {
+    const index: number = char - '0'.charCodeAt(0);
+    context.drawImage(digitsImage, 8 * index, 0, 8, 8,
+        x, y, 8, 8
+    );
 }
 
 document.addEventListener('keydown', (event: KeyboardEvent) => {
