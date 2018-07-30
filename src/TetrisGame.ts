@@ -1,7 +1,6 @@
 import { Playfield } from './Playfield';
 import { Shape } from './Shape';
 
-import Tiles from './assets/sprites2.png';
 import { ShapeSpawner } from './ShapeSpawner';
 import { Sound } from './sound/Sound';
 import { SoundManager } from './sound/SoundManager';
@@ -38,19 +37,17 @@ export class TetrisGame {
 
     private gamepad: Gamepad2 = new Gamepad2();
 
-    constructor(context: CanvasRenderingContext2D) {
+    constructor(context: CanvasRenderingContext2D, image: HTMLImageElement) {
         this.soundManager.loadSound(Sound.DROP, dropSound);
         this.soundManager.loadSound(Sound.REMOVE_ROWS, removalSound);
         this.soundManager.loadSound(Sound.ROTATION, rotate);
 
         this.context = context;
-        this.image = new Image();
-        this.image.onload = () => {
-            this.shape = new ShapeSpawner().getNextShape(this.image);
-            this.futureShape = new ShapeSpawner().getNextShape(this.image);
-            this.field = new Playfield(10, 20, this.image);
-        };
-        this.image.src = Tiles;
+        this.image = image;
+
+        this.shape = new ShapeSpawner().getNextShape(this.image);
+        this.futureShape = new ShapeSpawner().getNextShape(this.image);
+        this.field = new Playfield(10, 20, this.image);
     }
 
     public update(): void {

@@ -1,5 +1,6 @@
 import background from './assets/background.png';
 import digits from './assets/digits.png';
+import Tiles from './assets/sprites2.png';
 import { FullscreenUtils } from './fullscreen/FullscreenUtils';
 import { Position } from './Position';
 import { Shape } from './Shape';
@@ -30,9 +31,14 @@ image.src = background;
 const digitsImage = new Image();
 digitsImage.src = digits;
 
-const tetris: TetrisGame = new TetrisGame(context);
+let tetris: TetrisGame;
 
-requestAnimationFrame(() => draw());
+const imageSp = new Image();
+imageSp.onload = () => {
+    tetris = new TetrisGame(context, imageSp);
+    requestAnimationFrame(() => draw());
+};
+imageSp.src = Tiles;
 
 function draw(): void {
     context.setTransform(1, 0, 0, 1, 0, 0);
