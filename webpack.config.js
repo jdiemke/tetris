@@ -14,11 +14,11 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.ts$/,
+                test: /\.(ts|js)$/,
                 use: 'ts-loader'
             },
             {
-                test: /\.(png|jpg|mp3|ogg)$/,
+                test: /\.(png|jpg|mp3|ogg|xm)$/,
                 use: 'file-loader'
             }
         ]

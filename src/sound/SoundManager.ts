@@ -19,7 +19,10 @@ export class SoundManager {
     public play(sound: number) {
         const source = this.audioContext.createBufferSource();
         source.buffer = this.sounds.get(sound);
-        source.connect(this.audioContext.destination);
+        const gainNode = this.audioContext.createGain();
+        gainNode.gain.value = 0.3;
+        source.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
         source.start();
     }
 
