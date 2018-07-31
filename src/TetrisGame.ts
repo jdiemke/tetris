@@ -10,6 +10,7 @@ import removalSound from './assets/line-removal.mp3';
 import dropSound from './assets/slow-hit.mp3';
 
 import { Gamepad2 } from './Gamepad';
+import { ShapeType } from './ShapeType';
 
 export class TetrisGame {
 
@@ -34,6 +35,7 @@ export class TetrisGame {
     private elapsedTime: number = Date.now();
     private soundManager: SoundManager = new SoundManager();
     private image: HTMLImageElement;
+    private statistics: Map<ShapeType, number>;
 
     private gamepad: Gamepad2 = new Gamepad2();
 
@@ -45,9 +47,29 @@ export class TetrisGame {
         this.context = context;
         this.image = image;
 
-        this.shape = new ShapeSpawner().getNextShape(this.image);
+        this.statistics = new Map<ShapeType, number>();
+        this.statistics.set(ShapeType.I, 0);
+        this.statistics.set(ShapeType.J, 0);
+        this.statistics.set(ShapeType.L, 0);
+        this.statistics.set(ShapeType.O, 0);
+        this.statistics.set(ShapeType.S, 0);
+        this.statistics.set(ShapeType.T, 0);
+        this.statistics.set(ShapeType.Z, 0);
+
         this.futureShape = new ShapeSpawner().getNextShape(this.image);
+        this.emitNewShape();
+
         this.field = new Playfield(10, 20, this.image);
+    }
+
+    public getStatistics(): Map<ShapeType, number> {
+        return this.statistics;
+    }
+
+    public emitNewShape(): void {
+        this.statistics.set(this.futureShape.type, this.statistics.get(this.futureShape.type) + 1);
+        this.shape = this.futureShape;
+        this.futureShape = new ShapeSpawner().getNextShape(this.image);
     }
 
     public update(): void {
@@ -98,7 +120,7 @@ export class TetrisGame {
     }
 
     public getGhost(): Shape {
-        const ghost = new Shape(this.shape.tiles, this.image, 9);
+        const ghost = new Shape(this.shape.tiles, this.image, 9, this.shape.type);
         ghost.position.y = this.shape.position.y;
         ghost.position.x = this.shape.position.x;
         do {
@@ -152,8 +174,7 @@ export class TetrisGame {
             this.soundManager.play(Sound.DROP);
             this.shape.position.y -= 1;
             this.field.setBlocks(this.shape);
-            this.shape = this.futureShape;
-            this.futureShape = new ShapeSpawner().getNextShape(this.image);
+            this.emitNewShape();
             if (this.field.hasFullRows()) {
                 const fullRows: number = this.field.getNumberOfFullRows();
                 this.updateScore(this.level, fullRows);
@@ -177,8 +198,7 @@ export class TetrisGame {
         this.soundManager.play(Sound.DROP);
         this.shape.position.y -= 1;
         this.field.setBlocks(this.shape);
-        this.shape = this.futureShape;
-        this.futureShape = new ShapeSpawner().getNextShape(this.image);
+        this.emitNewShape();
         if (this.field.hasFullRows()) {
             const fullRows: number = this.field.getNumberOfFullRows();
             this.updateScore(this.level, fullRows);
