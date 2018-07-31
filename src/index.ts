@@ -9,6 +9,7 @@ import { TetrisGame } from './TetrisGame';
 
 import './jsxm/xm.js';
 import './jsxm/xmeffects.js';
+import { ShapeType } from './ShapeType';
 
 declare var XMPlayer: any;
 declare function require(name: string): any;
@@ -116,13 +117,13 @@ function drawStatistics(): void {
 
     drawNum(208, 160, pad(tetris.level.toString(), 2, '0')); // 2
 
-    drawNum(48, 88, pad('000', 3, '0')); // 3
-    drawNum(48, 88 + 16, pad('000', 3, '0')); // 3
-    drawNum(48, 88 + 16 + 16, pad('000', 3, '0')); // 3
-    drawNum(48, 88 + 16 + 16 + 16, pad('000', 3, '0')); // 3
-    drawNum(48, 88 + 16 + 16 + 16 + 16, pad('000', 3, '0')); // 3
-    drawNum(48, 88 + 16 + 16 + 16 + 16 + 16, pad('000', 3, '0')); // 3
-    drawNum(48, 88 + 16 + 16 + 16 + 16 + 16 + 16, pad('000', 3, '0')); // 3
+    drawNum(48, 88, pad(tetris.getStatistics().get(ShapeType.T).toString(), 3, '0')); // 3
+    drawNum(48, 88 + 16, pad(tetris.getStatistics().get(ShapeType.J).toString(), 3, '0')); // 3
+    drawNum(48, 88 + 16 + 16, pad(tetris.getStatistics().get(ShapeType.Z).toString(), 3, '0')); // 3
+    drawNum(48, 88 + 16 + 16 + 16, pad(tetris.getStatistics().get(ShapeType.O).toString(), 3, '0')); // 3
+    drawNum(48, 88 + 16 + 16 + 16 + 16, pad(tetris.getStatistics().get(ShapeType.S).toString(), 3, '0')); // 3
+    drawNum(48, 88 + 16 + 16 + 16 + 16 + 16, pad(tetris.getStatistics().get(ShapeType.L).toString(), 3, '0')); // 3
+    drawNum(48, 88 + 16 + 16 + 16 + 16 + 16 + 16, pad(tetris.getStatistics().get(ShapeType.I).toString(), 3, '0')); // 3
 }
 
 function drawNum(x: number, y: number, num: string): void {

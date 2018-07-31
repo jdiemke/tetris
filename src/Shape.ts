@@ -1,4 +1,5 @@
 import { Position } from './Position';
+import { ShapeType } from './ShapeType';
 
 export class Shape {
 
@@ -6,7 +7,8 @@ export class Shape {
     public tiles: Array<Array<number>>;
     public spriteId: number;
 
-    public constructor(tiles: Array<Array<number>>, private image: HTMLImageElement, sprite: number = 2) {
+    public constructor(tiles: Array<Array<number>>, private image: HTMLImageElement,
+                       sprite: number = 2, public type: ShapeType) {
         this.tiles = tiles;
         this.spriteId = sprite;
     }
