@@ -7,11 +7,11 @@ import { Position } from './Position';
 import { Shape } from './Shape';
 import { TetrisGame } from './TetrisGame';
 
-import './jsxm/xm.js';
-import './jsxm/xmeffects.js';
+import 'jsxm/xm';
+import 'jsxm/xmeffects';
+
 import { ShapeType } from './ShapeType';
 
-declare var XMPlayer: any;
 declare function require(name: string): any;
 
 XMPlayer.init();
