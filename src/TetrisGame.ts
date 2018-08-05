@@ -14,11 +14,19 @@ import { ShapeType } from './ShapeType';
 
 export class TetrisGame {
 
+    public static readonly FULL_ROW_ANIMATION_DELAY = 500;
+
+    private static readonly DELAY_AFTER_DROP = 500;
+
     public score: number = 0;
+
+    public state: number = 0;
+    public fullRows: Array<number>;
 
     public level: number = 0;
     public lineCounter: number = 0;
-
+    public oldDropTime: number = 0;
+    public nextDropTime: number = Date.now();
     private startLevel: number = 0;
 
     private rotatePressed: boolean = false;
@@ -33,6 +41,7 @@ export class TetrisGame {
     private height: number = 360;
 
     private elapsedTime: number = Date.now();
+
     private soundManager: SoundManager = new SoundManager();
     private image: HTMLImageElement;
     private statistics: Map<ShapeType, number>;
@@ -99,12 +108,27 @@ export class TetrisGame {
             this.inputElapsedTime = Date.now();
         }
 
-        if (this.shape !== null) {
-            if (Date.now() > this.elapsedTime + this.getTetrominoSpeedInMillis(this.level)) {
-                this.moveDown();
-                this.elapsedTime = Date.now();
+        if (this.state === 0) {
+            if (this.shape !== null) {
+                if (Date.now() >= this.nextDropTime) {
+                    this.moveDown();
+                }
+            }
+        } else if (this.state === 1) {
+            if (Date.now() >= this.nextDropTime) {
+                const fullRows: number = this.field.getNumberOfFullRows();
+                this.updateScore(this.level, fullRows);
+                this.field.removeFullRows();
+                this.lineCounter += fullRows;
+
+                const firstLevelStep: number =
+                    Math.min(this.startLevel * 10 + 10, Math.max(100, this.startLevel * 10 - 50));
+                this.level = Math.floor(Math.max(this.lineCounter - firstLevelStep, 0) / 10) +
+                    (this.lineCounter >= firstLevelStep ? 1 : 0);
+                this.state = 0;
             }
         }
+
     }
 
     public getField(): Playfield {
@@ -171,22 +195,29 @@ export class TetrisGame {
     public moveDown(): void {
         this.shape.position.y += 1;
         if (this.field.collides(this.shape)) {
-            this.soundManager.play(Sound.DROP);
-            this.shape.position.y -= 1;
-            this.field.setBlocks(this.shape);
-            this.emitNewShape();
-            if (this.field.hasFullRows()) {
-                const fullRows: number = this.field.getNumberOfFullRows();
-                this.updateScore(this.level, fullRows);
-                this.field.removeFullRows();
-                this.soundManager.play(Sound.REMOVE_ROWS);
-                this.lineCounter += fullRows;
+            this.onCollide();
+        } else {
+            this.oldDropTime = this.nextDropTime;
+            this.nextDropTime = this.oldDropTime + this.getTetrominoSpeedInMillis(this.level);
+        }
+    }
 
-                const firstLevelStep: number =
-                    Math.min(this.startLevel * 10 + 10, Math.max(100, this.startLevel * 10 - 50));
-                this.level = Math.floor(Math.max(this.lineCounter - firstLevelStep, 0) / 10) +
-                    (this.lineCounter >= firstLevelStep ? 1 : 0);
-            }
+    public onCollide(): void {
+        this.soundManager.play(Sound.DROP);
+        this.shape.position.y -= 1;
+        this.field.setBlocks(this.shape);
+        this.emitNewShape();
+
+        this.oldDropTime = this.nextDropTime;
+
+        if (this.field.hasFullRows()) {
+            this.soundManager.play(Sound.REMOVE_ROWS);
+
+            this.fullRows = this.field.getfFullRows();
+            this.nextDropTime = this.oldDropTime + TetrisGame.FULL_ROW_ANIMATION_DELAY;
+            this.state = 1;
+        } else {
+            this.nextDropTime = this.oldDropTime + TetrisGame.DELAY_AFTER_DROP;
         }
     }
 
@@ -195,21 +226,8 @@ export class TetrisGame {
             this.shape.position.y += 1;
         } while (!this.field.collides(this.shape));
 
-        this.soundManager.play(Sound.DROP);
-        this.shape.position.y -= 1;
-        this.field.setBlocks(this.shape);
-        this.emitNewShape();
-        if (this.field.hasFullRows()) {
-            const fullRows: number = this.field.getNumberOfFullRows();
-            this.updateScore(this.level, fullRows);
-            this.field.removeFullRows();
-            this.soundManager.play(Sound.REMOVE_ROWS);
-            this.lineCounter += fullRows;
-            const firstLevelStep: number =
-                Math.min(this.startLevel * 10 + 10, Math.max(100, this.startLevel * 10 - 50));
-            this.level = Math.floor(Math.max(this.lineCounter - firstLevelStep, 0) / 10) +
-                (this.lineCounter >= firstLevelStep ? 1 : 0);
-        }
+        this.nextDropTime = Date.now();
+        this.onCollide();
     }
 
     // uses original nintendo scoring system used in NES, GB and SNES versions
