@@ -5,9 +5,9 @@
 
 /**
  * FastTracker 2 XM Player
- * 
+ *
  * The player is fairly feature-complete, but is missing a bunch of effects.
- * 
+ *
  * MIT license.
  */
 declare namespace XMPlayer {
@@ -37,7 +37,7 @@ declare namespace XMPlayer {
      * Pauses the playback.
      */
     function pause(): void;
-   
+
     /**
      * Stops the playback. Call this before loading a new song.
      */
