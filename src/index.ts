@@ -7,33 +7,7 @@ import { Position } from './Position';
 import { Shape } from './Shape';
 import { TetrisGame } from './TetrisGame';
 
-import 'jsxm/xm';
-import 'jsxm/xmeffects';
-
 import { ShapeType } from './ShapeType';
-
-declare function require(name: string): any;
-
-XMPlayer.init();
-
-function downloadXM(uri) {
-    const xmReq = new XMLHttpRequest();
-    xmReq.open('GET', uri, true);
-    xmReq.responseType = 'arraybuffer';
-    xmReq.onload =  (xmEvent) => {
-        const arrayBuffer = xmReq.response;
-        if (arrayBuffer) {
-            XMPlayer.load(arrayBuffer);
-            XMPlayer.play();
-        } else {
-            console.log('unable to load', uri);
-        }
-    };
-    xmReq.send(null);
-}
-
-// tslint:disable-next-line:no-var-requires
-downloadXM(require('./assets/music/4mat-truck_is_jarig.xm'));
 
 const canvas: HTMLCanvasElement = document.createElement('canvas');
 canvas.width = 256;
