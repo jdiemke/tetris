@@ -65,8 +65,40 @@ function draw(): void {
 
     drawNextShape();
     drawStatistics();
+    if (tetris.state === 1) {
+        drawRemoval();
+    }
 
     requestAnimationFrame(() => draw());
+}
+
+function drawRemoval(): void {
+    context.translate(96, 40);
+    const diff = Date.now() - tetris.oldDropTime;
+    if (diff < 0) {
+        console.warn('negative', diff);
+    }
+    const time = Math.floor(Math.max(0, diff) / TetrisGame.FULL_ROW_ANIMATION_DELAY * 6) % 6;
+    context.fillStyle = 'black';
+    tetris.fullRows.forEach((x: number) => {
+        context.fillRect(5 * 8 - time * 8, x * 8, time * 8 * 2, 8);
+    });
+
+    if (tetris.fullRows.length === 4) {
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        const flicker: number = Math.floor(Date.now() * 0.02) % 2;
+
+        context.fillStyle = 'white';
+
+        if (flicker === 1) {
+            context.globalAlpha = 0;
+        } else {
+            context.globalAlpha = 1;
+        }
+
+        context.fillRect(0, 0, 256, 224);
+        context.globalAlpha = 1;
+    }
 }
 
 function drawNextShape(): void {
@@ -139,6 +171,9 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
 
     // soft drop: arrow down
     if (event.keyCode === 40) {
+        // FIXME: remove this side effect code
+        // maybe use const fps with num of frames for timing?
+        tetris.nextDropTime = Date.now();
         tetris.moveDown();
     }
 
