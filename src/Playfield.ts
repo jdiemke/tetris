@@ -49,6 +49,18 @@ export class Playfield {
         return count;
     }
 
+    public getfFullRows(): Array<number> {
+        const rows: Array<number> = new Array<number>();
+
+        for (let y: number = 0; y < this.height; y++) {
+            if (this.isFullRow(y)) {
+                rows.push(y);
+            }
+        }
+
+        return rows;
+    }
+
     public hasFullRows(): boolean {
         for (let y: number = 0; y < this.height; y++) {
             if (this.isFullRow(y)) {
