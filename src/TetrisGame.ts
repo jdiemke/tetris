@@ -42,7 +42,6 @@ export class TetrisGame {
 
     private gamepad: Gamepad2 = new Gamepad2();
 
-
     constructor(context: CanvasRenderingContext2D, image: HTMLImageElement) {
         this.soundManager.loadSound(Sound.DROP, dropSound);
         this.soundManager.loadSound(Sound.REMOVE_ROWS, removalSound);
@@ -63,7 +62,7 @@ export class TetrisGame {
 
         this.field = new Playfield(10, 20, this.image);
     }
-    
+
     public start(): void {
         this.nextDropTime = Date.now();
     }
