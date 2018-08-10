@@ -1,7 +1,9 @@
 
 import background from './assets/background.png';
 import digits from './assets/digits.png';
+import menu2 from './assets/main-menu.png';
 import Tiles from './assets/sprites2.png';
+import menu from './assets/title.png';
 import { FullscreenUtils } from './fullscreen/FullscreenUtils';
 import { Position } from './Position';
 import { Shape } from './Shape';
@@ -34,6 +36,12 @@ image.src = background;
 const digitsImage = new Image();
 digitsImage.src = digits;
 
+const menuImage = new Image();
+menuImage.src = menu;
+
+const menuImage2 = new Image();
+menuImage2.src = menu2;
+
 let tetris: TetrisGame;
 
 const imageSp = new Image();
@@ -43,30 +51,41 @@ imageSp.onload = () => {
 };
 imageSp.src = Tiles;
 
+let state: number = 0;
+
 function draw(): void {
-    context.setTransform(1, 0, 0, 1, 0, 0);
 
-    context.fillStyle = '#222222';
-    context.fillRect(0, 0, 640, 360);
-    context.drawImage(image, 0, 0, 256, 224, 0, 0, 256, 224);
+    if (state === 0) {
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.drawImage(menuImage, 0, 0, 256, 224, 0, 0, 256, 224);
+    } else if (state === 1) {
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.drawImage(menuImage2, 0, 0, 256, 224, 0, 0, 256, 224);
+    } else {
+        context.setTransform(1, 0, 0, 1, 0, 0);
 
-    tetris.update();
+        context.fillStyle = '#222222';
+        context.fillRect(0, 0, 640, 360);
+        context.drawImage(image, 0, 0, 256, 224, 0, 0, 256, 224);
 
-    tetris.getField().draw(context);
+        tetris.update();
 
-    context.globalAlpha = 0.24;
-    tetris.getGhost().draw(context);
-    context.globalAlpha = 1;
+        tetris.getField().draw(context);
 
-    const shape: Shape = tetris.getShape();
-    if (shape !== null) {
-        shape.draw(context);
-    }
+        context.globalAlpha = 0.24;
+        tetris.getGhost().draw(context);
+        context.globalAlpha = 1;
 
-    drawNextShape();
-    drawStatistics();
-    if (tetris.state === 1) {
-        drawRemoval();
+        const shape: Shape = tetris.getShape();
+        if (shape !== null) {
+            shape.draw(context);
+        }
+
+        drawNextShape();
+        drawStatistics();
+        if (tetris.state === 1) {
+            drawRemoval();
+        }
     }
 
     requestAnimationFrame(() => draw());
@@ -167,6 +186,13 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
     // rotate counter clockwhise: y
     if (event.keyCode === 89) {
         tetris.rotateCounterclockwise();
+    }
+
+    if (event.keyCode === 83) {
+        if (state === 1) {
+            tetris.start();
+        }
+        state++;
     }
 
     // soft drop: arrow down

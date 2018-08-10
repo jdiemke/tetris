@@ -35,12 +35,6 @@ export class TetrisGame {
     private field: Playfield;
     private shape: Shape;
     private futureShape: Shape;
-    private context: CanvasRenderingContext2D;
-
-    private width: number = 640;
-    private height: number = 360;
-
-    private elapsedTime: number = Date.now();
 
     private soundManager: SoundManager = new SoundManager();
     private image: HTMLImageElement;
@@ -48,12 +42,11 @@ export class TetrisGame {
 
     private gamepad: Gamepad2 = new Gamepad2();
 
+
     constructor(context: CanvasRenderingContext2D, image: HTMLImageElement) {
         this.soundManager.loadSound(Sound.DROP, dropSound);
         this.soundManager.loadSound(Sound.REMOVE_ROWS, removalSound);
         this.soundManager.loadSound(Sound.ROTATION, rotate);
-
-        this.context = context;
         this.image = image;
 
         this.statistics = new Map<ShapeType, number>();
@@ -69,6 +62,10 @@ export class TetrisGame {
         this.emitNewShape();
 
         this.field = new Playfield(10, 20, this.image);
+    }
+    
+    public start(): void {
+        this.nextDropTime = Date.now();
     }
 
     public getStatistics(): Map<ShapeType, number> {
