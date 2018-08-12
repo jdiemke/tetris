@@ -1,4 +1,5 @@
-import music from '../assets/music/4mat-truck_is_jarig.xm';
+import music from '../assets/music/chipphopp.xm';
+// import music from '../assets/music/4mat-truck_is_jarig.xm';
 
 // Side effect imports because jsxm exposes its player through a global scope object
 import 'jsxm/xm';
@@ -15,7 +16,7 @@ export class SoundManager {
         // this.audioContext = new AudioContext();
         this.audioContext = XMPlayer.audioctx;
 
-        this.playExtendedModule(music);
+       // this.playExtendedModule(music);
     }
 
     public loadSound(sound: number, filename: string): Promise<void> {
@@ -25,6 +26,11 @@ export class SoundManager {
             .then((audioBuffer: AudioBuffer) => {
                 this.sounds.set(sound, audioBuffer);
             });
+    }
+
+    public loadExtendedModule(filename: string): Promise<ArrayBuffer> {
+        return fetch(filename)
+            .then((response: Response) => response.arrayBuffer());
     }
 
     public playExtendedModule(filename: string) {

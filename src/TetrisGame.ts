@@ -7,7 +7,9 @@ import { SoundManager } from './sound/SoundManager';
 
 import rotate from './assets/block-rotate.mp3';
 import removalSound from './assets/line-removal.mp3';
-import dropSound from './assets/slow-hit.mp3';
+// import dropSound from './assets/slow-hit.mp3';
+
+import dropSound from './assets/drop.ogg';
 
 import { Gamepad2 } from './Gamepad';
 import { ShapeType } from './ShapeType';
@@ -35,12 +37,6 @@ export class TetrisGame {
     private field: Playfield;
     private shape: Shape;
     private futureShape: Shape;
-    private context: CanvasRenderingContext2D;
-
-    private width: number = 640;
-    private height: number = 360;
-
-    private elapsedTime: number = Date.now();
 
     private soundManager: SoundManager = new SoundManager();
     private image: HTMLImageElement;
@@ -52,8 +48,6 @@ export class TetrisGame {
         this.soundManager.loadSound(Sound.DROP, dropSound);
         this.soundManager.loadSound(Sound.REMOVE_ROWS, removalSound);
         this.soundManager.loadSound(Sound.ROTATION, rotate);
-
-        this.context = context;
         this.image = image;
 
         this.statistics = new Map<ShapeType, number>();
@@ -69,6 +63,10 @@ export class TetrisGame {
         this.emitNewShape();
 
         this.field = new Playfield(10, 20, this.image);
+    }
+
+    public start(): void {
+        this.nextDropTime = Date.now();
     }
 
     public getStatistics(): Map<ShapeType, number> {
