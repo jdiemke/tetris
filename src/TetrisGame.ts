@@ -7,7 +7,9 @@ import { SoundManager } from './sound/SoundManager';
 
 import rotate from './assets/block-rotate.mp3';
 import removalSound from './assets/line-removal.mp3';
-import dropSound from './assets/slow-hit.mp3';
+// import dropSound from './assets/slow-hit.mp3';
+
+import dropSound from './assets/drop.ogg';
 
 import { Gamepad2 } from './Gamepad';
 import { ShapeType } from './ShapeType';

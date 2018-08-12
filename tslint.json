@@ -18,7 +18,8 @@
             true,
             "generic"
         ],
-        "trailing-comma": false
+        "trailing-comma": false,
+        "no-var-requires": false
     },
     "rulesDirectory": []
 }
