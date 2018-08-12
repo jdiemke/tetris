@@ -1,5 +1,5 @@
 import music from '../assets/music/chipphopp.xm';
-//import music from '../assets/music/4mat-truck_is_jarig.xm';
+// import music from '../assets/music/4mat-truck_is_jarig.xm';
 
 // Side effect imports because jsxm exposes its player through a global scope object
 import 'jsxm/xm';
