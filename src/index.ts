@@ -30,6 +30,7 @@ import { SoundManager } from './sound/SoundManager';
 
 import 'jsxm/xm';
 import 'jsxm/xmeffects';
+import { OptionList } from './OptionList';
 
 const canvas: HTMLCanvasElement = document.createElement('canvas');
 canvas.width = 256;
@@ -73,24 +74,37 @@ let tetris: TetrisGame;
 const sm = new SoundManager();
 
 declare function require(name: string);
+let musicTypeOptions: OptionList<ArrayBuffer>;
 let music: Array<ArrayBuffer> = [];
-Promise.all([
-    sm.loadExtendedModule(require('./assets/music/tetris menu.xm')),
-    sm.loadExtendedModule(require('./assets/music/tetris ingame.xm'))
-]).then((res: Array<ArrayBuffer>) => {
-    music = res;
-});
 
 const imageSp = new Image();
 imageSp.onload = () => {
     tetris = new TetrisGame(context, imageSp);
-    requestAnimationFrame(() => draw());
+    Promise.all([
+        sm.loadExtendedModule(require('./assets/music/tetris ingame.xm')),
+        sm.loadExtendedModule(require('./assets/music/tetris ingame2.xm')),
+        sm.loadExtendedModule(require('./assets/music/tetris ingame3.xm'))
+    ]).then((res: Array<ArrayBuffer>) => {
+        music = res;
+        musicTypeOptions = new OptionList<ArrayBuffer>([
+            res[0], res[1], res[2], null
+        ], 0);
+        musicTypeOptions.addChangeListener((t: ArrayBuffer) => {
+            XMPlayer.stop();
+            if (t !== null) {
+                XMPlayer.load(t);
+                XMPlayer.play();
+            }
+        });
+        requestAnimationFrame(() => draw());
+    });
+
 };
 imageSp.src = Tiles;
 
 let state: number = 0;
-let gameType: number = 0;
-let musicType: number = 0;
+
+const gameTypeOptions: OptionList<number> = new OptionList<number>([0, 1], 0);
 
 function draw(): void {
 
@@ -100,8 +114,8 @@ function draw(): void {
     } else if (state === 1) {
         context.setTransform(1, 0, 0, 1, 0, 0);
         context.drawImage(menuImage2, 0, 0, 256, 224, 0, 0, 256, 224);
-        drawArrows(63 + gameType * 96, 55, 58);
-        drawArrows(103, 135 + musicType * 16, 74);
+        drawArrows(63 + gameTypeOptions.getOption() * 96, 55, 58);
+        drawArrows(103, 135 + musicTypeOptions.getIndex() * 16, 74);
     } else {
         context.setTransform(1, 0, 0, 1, 0, 0);
 
@@ -241,7 +255,7 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
             tetris.moveLeft();
         }
         if (state === 1) {
-            gameType = (gameType + 1) % 2;
+            gameTypeOptions.previous();
         }
     }
 
@@ -250,7 +264,7 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
             tetris.moveRight();
         }
         if (state === 1) {
-            gameType = (gameType + 1) % 2;
+            gameTypeOptions.next();
         }
     }
 
@@ -259,7 +273,7 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
             tetris.rotateClockwise();
         }
         if (state === 1) {
-            musicType = (musicType + 3) % 4;
+            musicTypeOptions.previous();
         }
     }
 
@@ -276,6 +290,9 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
         }
 
         if (state === 0 || state === 1) {
+            if (state === 0 ) {
+                musicTypeOptions.triggerCallback();
+             }
             state++;
         }
     }
@@ -290,11 +307,7 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
         }
 
         if (state === 1) {
-            musicType = (musicType + 1) % 4;
-            const track = musicType % 2;
-            XMPlayer.stop();
-            XMPlayer.load(music[track]);
-            XMPlayer.play();
+            musicTypeOptions.next();
         }
     }
 
