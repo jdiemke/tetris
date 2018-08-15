@@ -65,6 +65,10 @@ export class TetrisGame {
         this.field = new Playfield(10, 20, this.image);
     }
 
+    public setStartLevel(level: number): void {
+        this.startLevel = level;
+        this.level = level;
+    }
     public start(): void {
         this.nextDropTime = Date.now();
     }
@@ -122,7 +126,7 @@ export class TetrisGame {
                 const firstLevelStep: number =
                     Math.min(this.startLevel * 10 + 10, Math.max(100, this.startLevel * 10 - 50));
                 this.level = Math.floor(Math.max(this.lineCounter - firstLevelStep, 0) / 10) +
-                    (this.lineCounter >= firstLevelStep ? 1 : 0);
+                    (this.lineCounter >= firstLevelStep ? 1 : 0) + this.startLevel;
                 this.state = 0;
             }
         }
