@@ -139,7 +139,7 @@ function draw(): void {
         context.fillRect(0, 0, 640, 360);
         context.drawImage(image, 0, 0, 256, 224, 0, 0, 256, 224);
 
-        tetris.update();
+        context.setTransform(1, 0, 0, 1, 0, 0);
 
         tetris.getField().draw(context);
 
@@ -150,6 +150,12 @@ function draw(): void {
         const shape: Shape = tetris.getShape();
         if (shape !== null) {
             shape.draw(context);
+        }
+
+        if (tetris.state === 2) {
+            drawDeath();
+        } else {
+            tetris.update();
         }
 
         drawNextShape();
@@ -188,6 +194,19 @@ function drawRemoval(): void {
 
         context.fillRect(0, 0, 256, 224);
         context.globalAlpha = 1;
+    }
+}
+
+function drawDeath(): void {
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.translate(96, 40);
+    const scale: number = 0.0006;
+    const diff = Math.min(Math.max((Date.now() - tetris.deathTime) * scale, 0), 1);
+
+    for (let y: number = 0; y < Math.floor(20 * diff); y++) {
+        for (let x: number = 0; x < 10; x++) {
+            context.drawImage(imageSp, 1 * 8, 0, 8, 8, x * 8, y * 8, 8, 8);
+        }
     }
 }
 
