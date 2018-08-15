@@ -29,6 +29,7 @@ export class TetrisGame {
     public lineCounter: number = 0;
     public oldDropTime: number = 0;
     public nextDropTime: number = Date.now();
+    public deathTime = Date.now();
     private startLevel: number = 0;
 
     private rotatePressed: boolean = false;
@@ -58,11 +59,9 @@ export class TetrisGame {
         this.statistics.set(ShapeType.S, 0);
         this.statistics.set(ShapeType.T, 0);
         this.statistics.set(ShapeType.Z, 0);
-
+        this.field = new Playfield(10, 20, this.image);
         this.futureShape = new ShapeSpawner().getNextShape(this.image);
         this.emitNewShape();
-
-        this.field = new Playfield(10, 20, this.image);
     }
 
     public setStartLevel(level: number): void {
@@ -81,6 +80,12 @@ export class TetrisGame {
         this.statistics.set(this.futureShape.type, this.statistics.get(this.futureShape.type) + 1);
         this.shape = this.futureShape;
         this.futureShape = new ShapeSpawner().getNextShape(this.image);
+        // add here
+        if (this.field.collides(this.shape)) {
+            // game over
+            this.state = 2;
+            this.deathTime = this.nextDropTime;
+        }
     }
 
     public update(): void {
