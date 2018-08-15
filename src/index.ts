@@ -18,6 +18,7 @@ import background from './assets/background.png';
 import digits2 from './assets/digits-red.png';
 import digits from './assets/digits.png';
 import menu2 from './assets/main-menu.png';
+import menuLevel from './assets/menu-level.png';
 import Tiles from './assets/sprites2.png';
 import menu from './assets/title.png';
 import { FullscreenUtils } from './fullscreen/FullscreenUtils';
@@ -69,6 +70,9 @@ menuImage.src = menu;
 const menuImage2 = new Image();
 menuImage2.src = menu2;
 
+const menuImage3 = new Image();
+menuImage3.src = menuLevel;
+
 let tetris: TetrisGame;
 
 const sm = new SoundManager();
@@ -105,6 +109,7 @@ imageSp.src = Tiles;
 let state: number = 0;
 
 const gameTypeOptions: OptionList<number> = new OptionList<number>([0, 1], 0);
+const levelTypeOptions: OptionList<number> = new OptionList<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 0);
 
 function draw(): void {
 
@@ -116,6 +121,17 @@ function draw(): void {
         context.drawImage(menuImage2, 0, 0, 256, 224, 0, 0, 256, 224);
         drawArrows(63 + gameTypeOptions.getOption() * 96, 55, 58);
         drawArrows(103, 135 + musicTypeOptions.getIndex() * 16, 74);
+    } else if (state === 2) {
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.drawImage(menuImage3, 0, 0, 256, 224, 0, 0, 256, 224);
+
+        const column = levelTypeOptions.getIndex() % 5;
+        const row = Math.floor(levelTypeOptions.getIndex() / 5);
+
+        context.fillStyle = '#ffff00';
+        context.globalAlpha = 0.54;
+        context.fillRect(column * 16 + 52, row * 16 + 76, 16, 16);
+        context.globalAlpha = 1;
     } else {
         context.setTransform(1, 0, 0, 1, 0, 0);
 
@@ -251,25 +267,32 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
     }
 
     if (event.keyCode === 37) {
-        if (state === 2) {
+        if (state === 3) {
             tetris.moveLeft();
         }
         if (state === 1) {
             gameTypeOptions.previous();
         }
+
+        if (state === 2) {
+            levelTypeOptions.previous();
+        }
     }
 
     if (event.keyCode === 39) {
-        if (state === 2) {
+        if (state === 3) {
             tetris.moveRight();
         }
         if (state === 1) {
             gameTypeOptions.next();
         }
+        if (state === 2) {
+            levelTypeOptions.next();
+        }
     }
 
     if (event.keyCode === 38) {
-        if (state === 2) {
+        if (state === 3) {
             tetris.rotateClockwise();
         }
         if (state === 1) {
@@ -279,20 +302,21 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
 
     // rotate counter clockwhise: y
     if (event.keyCode === 89) {
-        if (state === 2) {
+        if (state === 3) {
             tetris.rotateCounterclockwise();
         }
     }
 
     if (event.keyCode === 83) {
-        if (state === 1) {
+        if (state === 2) {
+            tetris.setStartLevel(levelTypeOptions.getIndex());
             tetris.start();
         }
 
-        if (state === 0 || state === 1) {
-            if (state === 0 ) {
+        if (state === 0 || state === 1 || state === 2) {
+            if (state === 0) {
                 musicTypeOptions.triggerCallback();
-             }
+            }
             state++;
         }
     }
@@ -301,7 +325,7 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
     if (event.keyCode === 40) {
         // FIXME: remove this side effect code
         // maybe use const fps with num of frames for timing?
-        if (state === 2) {
+        if (state === 3) {
             tetris.nextDropTime = Date.now();
             tetris.moveDown();
         }
@@ -313,7 +337,7 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
 
     // hard drop: space
     if (event.keyCode === 32) {
-        if (state === 2) {
+        if (state === 3) {
             tetris.hardDrop();
         }
     }
