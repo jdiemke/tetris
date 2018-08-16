@@ -1,16 +1,15 @@
 
 /**
  * TODO:
+ * - BUG: hard drop restarts game over animation
  * - Add state machine or state class!
  * - Remove render code and move into render class
  * - Asset preloader
  * - different colors per level
- * - level selection
  * - credits
  * - game over
  * - high score
  * - add sound to menue
- * - limit menue selection to available set
  */
 
 import arrows from './assets/arrows.png';
@@ -205,7 +204,7 @@ function drawDeath(): void {
 
     for (let y: number = 0; y < Math.floor(20 * diff); y++) {
         for (let x: number = 0; x < 10; x++) {
-            context.drawImage(imageSp, 1 * 8, 0, 8, 8, x * 8, y * 8, 8, 8);
+            context.drawImage(imageSp, 5 * 8, 0, 8, 8, x * 8, y * 8, 8, 8);
         }
     }
 }
@@ -337,6 +336,12 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
                 musicTypeOptions.triggerCallback();
             }
             state++;
+        }
+
+        if (state === 3 && tetris.state === 2) {
+            XMPlayer.stop();
+            tetris = new TetrisGame(context, imageSp);
+            state = 0;
         }
     }
 
