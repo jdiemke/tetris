@@ -1,16 +1,17 @@
-
 /**
  * TODO:
- * - BUG: hard drop restarts game over animation
+ * - credits (before title screen)
+ * - different colors per level
  * - Add state machine or state class!
  * - Remove render code and move into render class
  * - Asset preloader
- * - different colors per level
- * - credits
- * - game over
  * - high score
- * - add sound to menue
  */
+import rotate from './assets/block-rotate.mp3';
+import removalSound from './assets/line-removal.mp3';
+import menSound from './assets/menuS.wav';
+
+import dropSound from './assets/drop.ogg';
 
 import arrows from './assets/arrows.png';
 import background from './assets/background.png';
@@ -31,6 +32,7 @@ import { SoundManager } from './sound/SoundManager';
 import 'jsxm/xm';
 import 'jsxm/xmeffects';
 import { OptionList } from './OptionList';
+import { Sound } from './sound/Sound';
 
 const canvas: HTMLCanvasElement = document.createElement('canvas');
 canvas.width = 256;
@@ -75,6 +77,10 @@ menuImage3.src = menuLevel;
 let tetris: TetrisGame;
 
 const sm = new SoundManager();
+sm.loadSound(Sound.DROP, dropSound);
+sm.loadSound(Sound.REMOVE_ROWS, removalSound);
+sm.loadSound(Sound.ROTATION, rotate);
+sm.loadSound(99, menSound);
 
 declare function require(name: string);
 let musicTypeOptions: OptionList<ArrayBuffer>;
@@ -82,7 +88,7 @@ let music: Array<ArrayBuffer> = [];
 
 const imageSp = new Image();
 imageSp.onload = () => {
-    tetris = new TetrisGame(context, imageSp);
+    tetris = new TetrisGame(context, imageSp, sm);
     Promise.all([
         sm.loadExtendedModule(require('./assets/music/tetris ingame.xm')),
         sm.loadExtendedModule(require('./assets/music/tetris ingame2.xm')),
@@ -138,13 +144,13 @@ function draw(): void {
         context.fillRect(0, 0, 640, 360);
         context.drawImage(image, 0, 0, 256, 224, 0, 0, 256, 224);
 
+        if (tetris.state !== 2) {
+            tetris.update();
+        }
+
         context.setTransform(1, 0, 0, 1, 0, 0);
 
         tetris.getField().draw(context);
-
-        context.globalAlpha = 0.24;
-        tetris.getGhost().draw(context);
-        context.globalAlpha = 1;
 
         const shape: Shape = tetris.getShape();
         if (shape !== null) {
@@ -153,9 +159,11 @@ function draw(): void {
 
         if (tetris.state === 2) {
             drawDeath();
-        } else {
-            tetris.update();
         }
+
+        context.globalAlpha = 0.24;
+        tetris.getGhost().draw(context);
+        context.globalAlpha = 1;
 
         drawNextShape();
         drawStatistics();
@@ -169,11 +177,9 @@ function draw(): void {
 
 function drawRemoval(): void {
     context.translate(96, 40);
-    const diff = Date.now() - tetris.oldDropTime;
-    if (diff < 0) {
-        console.warn('negative', diff);
-    }
-    const time = Math.floor(Math.max(0, diff) / TetrisGame.FULL_ROW_ANIMATION_DELAY * 6) % 6;
+    const scale = (Date.now() - tetris.oldDropTime) / TetrisGame.FULL_ROW_ANIMATION_DELAY;
+
+    const time = Math.floor(Math.max(0, Math.min(5.0, 6 * scale)));
     context.fillStyle = 'black';
     tetris.fullRows.forEach((x: number) => {
         context.fillRect(5 * 8 - time * 8, x * 8, time * 8 * 2, 8);
@@ -290,10 +296,12 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
         }
         if (state === 1) {
             gameTypeOptions.previous();
+            sm.play(99);
         }
 
         if (state === 2) {
             levelTypeOptions.previous();
+            sm.play(99);
         }
     }
 
@@ -303,9 +311,11 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
         }
         if (state === 1) {
             gameTypeOptions.next();
+            sm.play(99);
         }
         if (state === 2) {
             levelTypeOptions.next();
+            sm.play(99);
         }
     }
 
@@ -315,6 +325,7 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
         }
         if (state === 1) {
             musicTypeOptions.previous();
+            sm.play(99);
         }
     }
 
@@ -340,7 +351,7 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
 
         if (state === 3 && tetris.state === 2) {
             XMPlayer.stop();
-            tetris = new TetrisGame(context, imageSp);
+            tetris = new TetrisGame(context, imageSp, sm);
             state = 0;
         }
     }
@@ -356,6 +367,7 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
 
         if (state === 1) {
             musicTypeOptions.next();
+            sm.play(99);
         }
     }
 
