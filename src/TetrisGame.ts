@@ -5,12 +5,6 @@ import { ShapeSpawner } from './ShapeSpawner';
 import { Sound } from './sound/Sound';
 import { SoundManager } from './sound/SoundManager';
 
-import rotate from './assets/block-rotate.mp3';
-import removalSound from './assets/line-removal.mp3';
-// import dropSound from './assets/slow-hit.mp3';
-
-import dropSound from './assets/drop.ogg';
-
 import { Gamepad2 } from './Gamepad';
 import { ShapeType } from './ShapeType';
 
@@ -39,16 +33,13 @@ export class TetrisGame {
     private shape: Shape;
     private futureShape: Shape;
 
-    private soundManager: SoundManager = new SoundManager();
     private image: HTMLImageElement;
     private statistics: Map<ShapeType, number>;
 
     private gamepad: Gamepad2 = new Gamepad2();
 
-    constructor(context: CanvasRenderingContext2D, image: HTMLImageElement) {
-        this.soundManager.loadSound(Sound.DROP, dropSound);
-        this.soundManager.loadSound(Sound.REMOVE_ROWS, removalSound);
-        this.soundManager.loadSound(Sound.ROTATION, rotate);
+    constructor(context: CanvasRenderingContext2D, image: HTMLImageElement, private soundManager: SoundManager) {
+
         this.image = image;
 
         this.statistics = new Map<ShapeType, number>();
@@ -200,6 +191,10 @@ export class TetrisGame {
     }
 
     public moveDown(): void {
+        if (this.state === 2) {
+            return;
+        }
+
         this.shape.position.y += 1;
         if (this.field.collides(this.shape)) {
             this.onCollide();
@@ -229,6 +224,10 @@ export class TetrisGame {
     }
 
     public hardDrop(): void {
+        if (this.state === 2) {
+            return;
+        }
+
         do {
             this.shape.position.y += 1;
         } while (!this.field.collides(this.shape));
