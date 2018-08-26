@@ -1,11 +1,14 @@
 /**
  * TODO:
+ * - bug: soft drop / hard drop does not stop after collision (next tetromino also drops immediately)
  * - credits (before title screen)
+ * - a type congratulations screen
  * - different colors per level
  * - Add state machine or state class!
  * - Remove render code and move into render class
  * - Asset preloader
  * - high score
+ * - colored fonts: https://github.com/geoffb/canvas-bitmap-fonts/blob/master/index.html
  */
 import rotate from './assets/block-rotate.mp3';
 import removalSound from './assets/line-removal.mp3';
@@ -17,6 +20,7 @@ import arrows from './assets/arrows.png';
 import background from './assets/background.png';
 import digits2 from './assets/digits-red.png';
 import digits from './assets/digits.png';
+import font2 from './assets/font2.png';
 import menu2 from './assets/main-menu.png';
 import menuLevel from './assets/menu-level.png';
 import Tiles from './assets/sprites2.png';
@@ -58,6 +62,9 @@ image.src = background;
 
 const digitsImage = new Image();
 digitsImage.src = digits;
+
+const fonts2Image = new Image();
+fonts2Image.src = font2;
 
 const digits2Image = new Image();
 digits2Image.src = digits2;
@@ -116,6 +123,26 @@ let state: number = 0;
 const gameTypeOptions: OptionList<number> = new OptionList<number>([0, 1], 0);
 const levelTypeOptions: OptionList<number> = new OptionList<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 0);
 
+class HightScore {
+
+    public name: string;
+    public score: number;
+    public level: number;
+
+    constructor(name: string, score: number, level: number) {
+        this.name = name;
+        this.score = score;
+        this.level = level;
+    }
+
+}
+
+const highScoreList: Array<HightScore> = [
+    new HightScore('JOHANN', 10000, 9),
+    new HightScore('OTASAN', 7500, 5),
+    new HightScore('LANCE ', 5000, 0)
+];
+
 function draw(): void {
 
     if (state === 0) {
@@ -130,13 +157,7 @@ function draw(): void {
         context.setTransform(1, 0, 0, 1, 0, 0);
         context.drawImage(menuImage3, 0, 0, 256, 224, 0, 0, 256, 224);
 
-        const column = levelTypeOptions.getIndex() % 5;
-        const row = Math.floor(levelTypeOptions.getIndex() / 5);
-
-        context.fillStyle = '#ffff00';
-        context.globalAlpha = 0.54;
-        context.fillRect(column * 16 + 52, row * 16 + 76, 16, 16);
-        context.globalAlpha = 1;
+        drawSelectedLevel();
     } else {
         context.setTransform(1, 0, 0, 1, 0, 0);
 
@@ -159,6 +180,9 @@ function draw(): void {
 
         if (tetris.state === 2) {
             drawDeath();
+            context.setTransform(1, 0, 0, 1, 0, 0);
+
+            drawText(8 * 12.5, 8 * 14, 'GAME OVER');
         }
 
         context.globalAlpha = 0.24;
@@ -173,6 +197,35 @@ function draw(): void {
     }
 
     requestAnimationFrame(() => draw());
+}
+
+function drawSelectedLevel() {
+
+    const column = levelTypeOptions.getIndex() % 5;
+    const row = Math.floor(levelTypeOptions.getIndex() / 5);
+
+    context.fillStyle = '#ffff00';
+    const flicker: number = Math.floor(Date.now() * 0.02) % 2;
+
+    if (flicker === 1) {
+        context.globalAlpha = 0;
+    } else {
+        context.globalAlpha = 0.75;
+    }
+
+    context.fillRect(column * 16 + 52, row * 16 + 76, 16, 16);
+
+    context.globalAlpha = 1;
+
+    for (let i = 0; i < 10; i++) {
+        drawText(56 + (i % 5) * 16, 80 + Math.floor(i / 5) * 16, i.toString());
+    }
+
+    for (let i = 0; i < highScoreList.length; i++) {
+        const entry: string = (i + 1).toString() + ' ' + highScoreList[i].name + ' '
+            + pad(highScoreList[i].score.toString(), 6, '0') + ' ' + pad(highScoreList[i].level.toString(), 2, '0');
+        drawText(56, 152 + i * 16, entry);
+    }
 }
 
 function drawRemoval(): void {
@@ -262,6 +315,22 @@ function drawDigit(x: number, y: number, char: number, img: HTMLImageElement): v
     );
 }
 
+function drawText(x: number, y: number, text: string): void {
+    const img: HTMLImageElement = fonts2Image;
+    for (let i: number = 0; i < text.length; i++) {
+        drawChar(x + i * 8, y, text.charCodeAt(i), img);
+    }
+}
+
+function drawChar(x: number, y: number, char: number, img: HTMLImageElement): void {
+    const index: number = char - ' '.charCodeAt(0);
+    const yIndex = Math.floor(index / 32);
+    const xIndex = Math.floor(index % 32);
+    context.drawImage(img, 8 * xIndex, 8 * yIndex, 8, 8,
+        x, y, 8, 8
+    );
+}
+
 function drawArrows(x: number, y: number, width: number): void {
     const flicker: number = Math.floor(Date.now() * 0.02) % 2;
 
@@ -284,7 +353,9 @@ function drawArrows(x: number, y: number, width: number): void {
     context.globalAlpha = 1;
 }
 
-document.addEventListener('keydown', (event: KeyboardEvent) => {
+const KEY_DOWN_EVENT_LISTENER: string = 'keydown';
+
+document.addEventListener(KEY_DOWN_EVENT_LISTENER, (event: KeyboardEvent) => {
 
     if (event.keyCode === 70) {
         FullscreenUtils.fullscreen(canvas);
@@ -358,9 +429,9 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
 
     // soft drop: arrow down
     if (event.keyCode === 40) {
-        // FIXME: remove this side effect code
-        // maybe use const fps with num of frames for timing?
         if (state === 3) {
+            // FIXME: remove this side effect code
+            // maybe use const fps with num of frames for timing?
             tetris.nextDropTime = Date.now();
             tetris.moveDown();
         }

@@ -1,3 +1,10 @@
+/**
+ * OptionList
+ *
+ * @export
+ * @class OptionList
+ * @template T
+ */
 export class OptionList<T> {
 
     private options: Array<T>;
