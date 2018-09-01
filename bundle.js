@@ -288,7 +288,7 @@ eval("module.exports = __webpack_require__.p + \"6dedea8612bb407c423d3c22e4e48f3
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"8e4466c19426efdd71b025c79ed1ce34.png\";\n\n//# sourceURL=webpack:///./src/assets/font2.png?");
+eval("module.exports = __webpack_require__.p + \"ffa3cfb5f870330b7d2bf88e7842f214.png\";\n\n//# sourceURL=webpack:///./src/assets/font2.png?");
 
 /***/ }),
 
@@ -321,7 +321,7 @@ eval("module.exports = __webpack_require__.p + \"04c7714461b7667097960bf9ba95438
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"f407017427bfc90f85aaca23facfe8ea.png\";\n\n//# sourceURL=webpack:///./src/assets/menu-level.png?");
+eval("module.exports = __webpack_require__.p + \"088a53fbcfa7246455e4b676308edaea.png\";\n\n//# sourceURL=webpack:///./src/assets/menu-level.png?");
 
 /***/ }),
 
