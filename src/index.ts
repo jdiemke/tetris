@@ -1,7 +1,6 @@
 /**
  * TODO:
  * - bug: soft drop / hard drop does not stop after collision (next tetromino also drops immediately)
- * - credits (before title screen)
  * - a type congratulations screen
  * - different colors per level
  * - Add state machine or state class!
@@ -18,6 +17,7 @@ import dropSound from './assets/drop.ogg';
 
 import arrows from './assets/arrows.png';
 import background from './assets/background.png';
+import credits from './assets/credits.png';
 import digits2 from './assets/digits-red.png';
 import digits from './assets/digits.png';
 import font2 from './assets/font2.png';
@@ -65,6 +65,9 @@ digitsImage.src = digits;
 
 const fonts2Image = new Image();
 fonts2Image.src = font2;
+
+const creditsImage = new Image();
+creditsImage.src = credits;
 
 const digits2Image = new Image();
 digits2Image.src = digits2;
@@ -147,13 +150,16 @@ function draw(): void {
 
     if (state === 0) {
         context.setTransform(1, 0, 0, 1, 0, 0);
-        context.drawImage(menuImage, 0, 0, 256, 224, 0, 0, 256, 224);
+        context.drawImage(creditsImage, 0, 0, 256, 224, 0, 0, 256, 224);
     } else if (state === 1) {
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.drawImage(menuImage, 0, 0, 256, 224, 0, 0, 256, 224);
+    } else if (state === 2) {
         context.setTransform(1, 0, 0, 1, 0, 0);
         context.drawImage(menuImage2, 0, 0, 256, 224, 0, 0, 256, 224);
         drawArrows(63 + gameTypeOptions.getOption() * 96, 55, 58);
         drawArrows(103, 135 + musicTypeOptions.getIndex() * 16, 74);
-    } else if (state === 2) {
+    } else if (state === 3) {
         context.setTransform(1, 0, 0, 1, 0, 0);
         context.drawImage(menuImage3, 0, 0, 256, 224, 0, 0, 256, 224);
 
@@ -362,39 +368,39 @@ document.addEventListener(KEY_DOWN_EVENT_LISTENER, (event: KeyboardEvent) => {
     }
 
     if (event.keyCode === 37) {
-        if (state === 3) {
+        if (state === 4) {
             tetris.moveLeft();
         }
-        if (state === 1) {
+        if (state === 2) {
             gameTypeOptions.previous();
             sm.play(99);
         }
 
-        if (state === 2) {
+        if (state === 3) {
             levelTypeOptions.previous();
             sm.play(99);
         }
     }
 
     if (event.keyCode === 39) {
-        if (state === 3) {
+        if (state === 4) {
             tetris.moveRight();
         }
-        if (state === 1) {
+        if (state === 2) {
             gameTypeOptions.next();
             sm.play(99);
         }
-        if (state === 2) {
+        if (state === 3) {
             levelTypeOptions.next();
             sm.play(99);
         }
     }
 
     if (event.keyCode === 38) {
-        if (state === 3) {
+        if (state === 4) {
             tetris.rotateClockwise();
         }
-        if (state === 1) {
+        if (state === 2) {
             musicTypeOptions.previous();
             sm.play(99);
         }
@@ -402,25 +408,25 @@ document.addEventListener(KEY_DOWN_EVENT_LISTENER, (event: KeyboardEvent) => {
 
     // rotate counter clockwhise: y
     if (event.keyCode === 89) {
-        if (state === 3) {
+        if (state === 4) {
             tetris.rotateCounterclockwise();
         }
     }
 
     if (event.keyCode === 83) {
-        if (state === 2) {
+        if (state === 3) {
             tetris.setStartLevel(levelTypeOptions.getIndex());
             tetris.start();
         }
 
-        if (state === 0 || state === 1 || state === 2) {
-            if (state === 0) {
+        if (state === 0 || state === 1 || state === 2 || state === 3) {
+            if (state === 1) {
                 musicTypeOptions.triggerCallback();
             }
             state++;
         }
 
-        if (state === 3 && tetris.state === 2) {
+        if (state === 4 && tetris.state === 2) {
             XMPlayer.stop();
             tetris = new TetrisGame(context, imageSp, sm);
             state = 0;
@@ -429,14 +435,14 @@ document.addEventListener(KEY_DOWN_EVENT_LISTENER, (event: KeyboardEvent) => {
 
     // soft drop: arrow down
     if (event.keyCode === 40) {
-        if (state === 3) {
+        if (state === 4) {
             // FIXME: remove this side effect code
             // maybe use const fps with num of frames for timing?
             tetris.nextDropTime = Date.now();
             tetris.moveDown();
         }
 
-        if (state === 1) {
+        if (state === 2) {
             musicTypeOptions.next();
             sm.play(99);
         }
@@ -444,7 +450,7 @@ document.addEventListener(KEY_DOWN_EVENT_LISTENER, (event: KeyboardEvent) => {
 
     // hard drop: space
     if (event.keyCode === 32) {
-        if (state === 3) {
+        if (state === 4) {
             tetris.hardDrop();
         }
     }
