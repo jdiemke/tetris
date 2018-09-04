@@ -199,7 +199,6 @@ function draw(): void {
 
         context.globalAlpha = 1;
 
-
         for (let i = 0; i < highScoreList.length; i++) {
             const entry: string = (i + 1).toString() + ' ' + highScoreList[i].name + ' '
                 + pad(highScoreList[i].score.toString(), 6, '0') + ' ' + pad(highScoreList[i].level.toString(), 2, '0');
