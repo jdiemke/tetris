@@ -1,12 +1,12 @@
 /**
  * TODO:
+ * - bug: hard drop during erase animation retriggers animation!
  * - bug: soft drop / hard drop does not stop after collision (next tetromino also drops immediately)
  * - a type congratulations screen
  * - different colors per level
  * - Add state machine or state class!
  * - Remove render code and move into render class
  * - Asset preloader
- * - high score
  * - colored fonts: https://github.com/geoffb/canvas-bitmap-fonts/blob/master/index.html
  */
 import rotate from './assets/block-rotate.mp3';
@@ -17,6 +17,7 @@ import dropSound from './assets/drop.ogg';
 
 import arrows from './assets/arrows.png';
 import background from './assets/background.png';
+import congrats from './assets/congratulations.png';
 import credits from './assets/credits.png';
 import digits2 from './assets/digits-red.png';
 import digits from './assets/digits.png';
@@ -68,6 +69,9 @@ fonts2Image.src = font2;
 
 const creditsImage = new Image();
 creditsImage.src = credits;
+
+const congratsImage = new Image();
+congratsImage.src = congrats;
 
 const digits2Image = new Image();
 digits2Image.src = digits2;
@@ -125,6 +129,11 @@ let state: number = 0;
 
 const gameTypeOptions: OptionList<number> = new OptionList<number>([0, 1], 0);
 const levelTypeOptions: OptionList<number> = new OptionList<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 0);
+const charOrder: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,/()". -';
+
+const allChars = charOrder.split('');
+
+let nameOption: OptionList<OptionList<string>> = null;
 
 class HightScore {
 
@@ -143,8 +152,11 @@ class HightScore {
 const highScoreList: Array<HightScore> = [
     new HightScore('JOHANN', 10000, 9),
     new HightScore('OTASAN', 7500, 5),
-    new HightScore('LANCE ', 5000, 0)
+    new HightScore('LANCE ', 100, 0)
 ];
+let hightScoreIndex: number = 0;
+
+let highScore: HightScore = null;
 
 function draw(): void {
 
@@ -164,6 +176,34 @@ function draw(): void {
         context.drawImage(menuImage3, 0, 0, 256, 224, 0, 0, 256, 224);
 
         drawSelectedLevel();
+    } else if (state === 5) {
+        // enter name!
+        //
+
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.drawImage(congratsImage, 0, 0, 256, 224, 0, 0, 256, 224);
+        // color of curso #ff9047
+
+        const row = nameOption.getIndex();
+
+        context.fillStyle = '#ff9047';
+        const flicker: number = Math.floor(Date.now() * 0.01) % 2;
+
+        if (flicker === 1) {
+            context.globalAlpha = 0;
+        } else {
+            context.globalAlpha = 0.75;
+        }
+
+        context.fillRect(56 + 8 + 8 + row * 8, 152 + hightScoreIndex * 16, 8, 8);
+
+        context.globalAlpha = 1;
+
+        for (let i = 0; i < highScoreList.length; i++) {
+            const entry: string = (i + 1).toString() + ' ' + highScoreList[i].name + ' '
+                + pad(highScoreList[i].score.toString(), 6, '0') + ' ' + pad(highScoreList[i].level.toString(), 2, '0');
+            drawText(56, 152 + i * 16, entry);
+        }
     } else {
         context.setTransform(1, 0, 0, 1, 0, 0);
 
@@ -188,6 +228,8 @@ function draw(): void {
             drawDeath();
             context.setTransform(1, 0, 0, 1, 0, 0);
 
+            context.fillStyle = '#000000';
+            context.fillRect(8 * 12.5 - 4, 8 * 14 - 4, 8 * 10, 8 * 2);
             drawText(8 * 12.5, 8 * 14, 'GAME OVER');
         }
 
@@ -380,6 +422,10 @@ document.addEventListener(KEY_DOWN_EVENT_LISTENER, (event: KeyboardEvent) => {
             levelTypeOptions.previous();
             sm.play(99);
         }
+
+        if (state === 5) {
+            nameOption.previous();
+        }
     }
 
     if (event.keyCode === 39) {
@@ -394,6 +440,9 @@ document.addEventListener(KEY_DOWN_EVENT_LISTENER, (event: KeyboardEvent) => {
             levelTypeOptions.next();
             sm.play(99);
         }
+        if (state === 5) {
+            nameOption.next();
+        }
     }
 
     if (event.keyCode === 38) {
@@ -403,6 +452,17 @@ document.addEventListener(KEY_DOWN_EVENT_LISTENER, (event: KeyboardEvent) => {
         if (state === 2) {
             musicTypeOptions.previous();
             sm.play(99);
+        }
+
+        if (state === 5) {
+            nameOption.getOption().next();
+            const options: Array<OptionList<string>> = nameOption.getOptions();
+
+            let newName: string = '';
+            for (let i = 0; i < options.length; i++) {
+                newName += options[i].getOption();
+            }
+            highScore.name = newName;
         }
     }
 
@@ -424,10 +484,42 @@ document.addEventListener(KEY_DOWN_EVENT_LISTENER, (event: KeyboardEvent) => {
                 musicTypeOptions.triggerCallback();
             }
             state++;
-        }
-
-        if (state === 4 && tetris.state === 2) {
+        } else if (state === 4 && tetris.state === 2) {
             XMPlayer.stop();
+            if (tetris.score > highScoreList[2].score) {
+                const charOptions1: OptionList<string> = new OptionList(allChars, allChars.length - 1, true);
+                const charOptions2: OptionList<string> = new OptionList(allChars, allChars.length - 1, true);
+                const charOptions3: OptionList<string> = new OptionList(allChars, allChars.length - 1, true);
+                const charOptions4: OptionList<string> = new OptionList(allChars, allChars.length - 1, true);
+                const charOptions5: OptionList<string> = new OptionList(allChars, allChars.length - 1, true);
+                const charOptions6: OptionList<string> = new OptionList(allChars, allChars.length - 1, true);
+                nameOption = new OptionList(
+                    [
+                        charOptions1,
+                        charOptions2,
+                        charOptions3,
+                        charOptions4,
+                        charOptions5,
+                        charOptions6
+                    ], 0
+                );
+
+                for (let i = 0; i < highScoreList.length; i++) {
+                    if (highScoreList[i].score < tetris.score) {
+                        highScore = highScoreList[i];
+                        hightScoreIndex = i;
+                        break;
+                    }
+                }
+                highScore.score = tetris.score;
+                highScore.level = tetris.level;
+                highScore.name = '------';
+                state = 5;
+            } else {
+                tetris = new TetrisGame(context, imageSp, sm);
+                state = 0;
+            }
+        } else if (state === 5) {
             tetris = new TetrisGame(context, imageSp, sm);
             state = 0;
         }
@@ -445,6 +537,17 @@ document.addEventListener(KEY_DOWN_EVENT_LISTENER, (event: KeyboardEvent) => {
         if (state === 2) {
             musicTypeOptions.next();
             sm.play(99);
+        }
+
+        if (state === 5) {
+            nameOption.getOption().previous();
+            const options: Array<OptionList<string>> = nameOption.getOptions();
+
+            let newName: string = '';
+            for (let i = 0; i < options.length; i++) {
+                newName += options[i].getOption();
+            }
+            highScore.name = newName;
         }
     }
 
