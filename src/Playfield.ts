@@ -1,5 +1,6 @@
 import { Position } from './Position';
 import { Shape } from './Shape';
+import { SpriteMapper } from './SpriteMapper';
 
 /**
  * The playfield class
@@ -8,7 +9,10 @@ export class Playfield {
 
     private field: Array<number>;
 
-    public constructor(private width: number, private height: number, private image: HTMLImageElement) {
+    public constructor(private width: number,
+                       private height: number,
+                       private image: HTMLImageElement,
+                       private spriteMapping: SpriteMapper) {
         this.width = width;
         this.height = height;
         this.field = new Array<number>(width * height);
@@ -79,7 +83,7 @@ export class Playfield {
             for (let x: number = 0; x < this.width; x++) {
                 const num: number = this.field[x + y * this.width];
                 if (num !== 0) {
-                    this.drawSprite(context, x, y, num);
+                    this.drawSprite(context, x, y, this.spriteMapping.getSprite(num));
                 }
             }
         }
