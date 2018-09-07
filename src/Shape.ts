@@ -1,5 +1,6 @@
 import { Position } from './Position';
 import { ShapeType } from './ShapeType';
+import { SpriteMapper } from './SpriteMapper';
 
 export class Shape {
 
@@ -8,7 +9,7 @@ export class Shape {
     public spriteId: number;
 
     public constructor(tiles: Array<Array<number>>, private image: HTMLImageElement,
-                       sprite: number = 2, public type: ShapeType) {
+                       sprite: number = 2, public type: ShapeType, private spriteMapping: SpriteMapper) {
         this.tiles = tiles;
         this.spriteId = sprite;
     }
@@ -18,7 +19,7 @@ export class Shape {
             for (let x: number = 0; x < this.tiles[y].length; x++) {
                 const num: number = this.tiles[y][x];
                 if (num === 1) {
-                    context.drawImage(this.image, 8 * this.spriteId, 0, 8, 8,
+                    context.drawImage(this.image, 8 * this.spriteMapping.getSprite(this.spriteId), 0, 8, 8,
                         this.position.x * 8 + x * 8, this.position.y * 8 + y * 8, 8, 8
                     );
                 }
@@ -31,7 +32,7 @@ export class Shape {
             for (let x: number = 0; x < this.tiles[y].length; x++) {
                 const num: number = this.tiles[y][x];
                 if (num === 1) {
-                    context.drawImage(this.image, 8 * this.spriteId, 0, 8, 8,
+                    context.drawImage(this.image, 8 * this.spriteMapping.getSprite(this.spriteId), 0, 8, 8,
                         pos.x + x * 8, pos.y + y * 8, 8, 8
                     );
                 }

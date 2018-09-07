@@ -7,6 +7,7 @@ import { SoundManager } from './sound/SoundManager';
 
 import { Gamepad2 } from './Gamepad';
 import { ShapeType } from './ShapeType';
+import { SpriteMapper } from './SpriteMapper';
 
 export class TetrisGame {
 
@@ -37,10 +38,13 @@ export class TetrisGame {
     private statistics: Map<ShapeType, number>;
 
     private gamepad: Gamepad2 = new Gamepad2();
+    private spriteMappings: SpriteMapper;
 
     constructor(context: CanvasRenderingContext2D, image: HTMLImageElement, private soundManager: SoundManager) {
 
         this.image = image;
+
+        this.spriteMappings  = new SpriteMapper(() => this.level);
 
         this.statistics = new Map<ShapeType, number>();
         this.statistics.set(ShapeType.I, 0);
@@ -50,8 +54,8 @@ export class TetrisGame {
         this.statistics.set(ShapeType.S, 0);
         this.statistics.set(ShapeType.T, 0);
         this.statistics.set(ShapeType.Z, 0);
-        this.field = new Playfield(10, 20, this.image);
-        this.futureShape = new ShapeSpawner().getNextShape(this.image);
+        this.field = new Playfield(10, 20, this.image, this.spriteMappings);
+        this.futureShape = new ShapeSpawner(this.spriteMappings).getNextShape(this.image);
         this.emitNewShape();
     }
 
@@ -70,7 +74,7 @@ export class TetrisGame {
     public emitNewShape(): void {
         this.statistics.set(this.futureShape.type, this.statistics.get(this.futureShape.type) + 1);
         this.shape = this.futureShape;
-        this.futureShape = new ShapeSpawner().getNextShape(this.image);
+        this.futureShape = new ShapeSpawner(this.spriteMappings).getNextShape(this.image);
         // add here
         if (this.field.collides(this.shape)) {
             // game over
@@ -142,7 +146,7 @@ export class TetrisGame {
     }
 
     public getGhost(): Shape {
-        const ghost = new Shape(this.shape.tiles, this.image, 9, this.shape.type);
+        const ghost = new Shape(this.shape.tiles, this.image, 9, this.shape.type, this.spriteMappings);
         ghost.position.y = this.shape.position.y;
         ghost.position.x = this.shape.position.x;
         do {

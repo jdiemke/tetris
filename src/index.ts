@@ -1,13 +1,11 @@
 /**
  * TODO:
  * - bug: hard drop during erase animation retriggers animation!
+ *   if key is pressed animation never starts
  * - bug: soft drop / hard drop does not stop after collision (next tetromino also drops immediately)
- * - a type congratulations screen
- * - different colors per level
  * - Add state machine or state class!
  * - Remove render code and move into render class
  * - Asset preloader
- * - colored fonts: https://github.com/geoffb/canvas-bitmap-fonts/blob/master/index.html
  */
 import rotate from './assets/block-rotate.mp3';
 import removalSound from './assets/line-removal.mp3';
@@ -234,7 +232,7 @@ function draw(): void {
         }
 
         context.globalAlpha = 0.24;
-        tetris.getGhost().draw(context);
+        // tetris.getGhost().draw(context);
         context.globalAlpha = 1;
 
         drawNextShape();
