@@ -1,7 +1,5 @@
 /**
  * TODO:
- * - bug: hard drop during erase animation retriggers animation!
- *   if key is pressed animation never starts
  * - bug: soft drop / hard drop does not stop after collision (next tetromino also drops immediately)
  * - Add state machine or state class!
  * - Remove render code and move into render class
