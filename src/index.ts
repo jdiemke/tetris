@@ -1,7 +1,5 @@
 /**
  * TODO:
- * - bug: hard drop during erase animation retriggers animation!
- *   if key is pressed animation never starts
  * - bug: soft drop / hard drop does not stop after collision (next tetromino also drops immediately)
  * - Add state machine or state class!
  * - Remove render code and move into render class
@@ -528,8 +526,10 @@ document.addEventListener(KEY_DOWN_EVENT_LISTENER, (event: KeyboardEvent) => {
         if (state === 4) {
             // FIXME: remove this side effect code
             // maybe use const fps with num of frames for timing?
-            tetris.nextDropTime = Date.now();
-            tetris.moveDown();
+            if (tetris.isInputAllowed()) {
+                tetris.nextDropTime = Date.now();
+                tetris.moveDown();
+            }
         }
 
         if (state === 2) {

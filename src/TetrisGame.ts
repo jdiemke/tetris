@@ -9,6 +9,12 @@ import { Gamepad2 } from './Gamepad';
 import { ShapeType } from './ShapeType';
 import { SpriteMapper } from './SpriteMapper';
 
+enum TetrisState {
+    INPUT_ALLOWED = 0,
+    FULL_ROW_ANIMATION = 1,
+    GAME_OVER = 2,
+}
+
 export class TetrisGame {
 
     public static readonly FULL_ROW_ANIMATION_DELAY = 500;
@@ -17,7 +23,7 @@ export class TetrisGame {
 
     public score: number = 0;
 
-    public state: number = 0;
+    public state: TetrisState = TetrisState.INPUT_ALLOWED;
     public fullRows: Array<number>;
 
     public level: number = 0;
@@ -78,7 +84,7 @@ export class TetrisGame {
         // add here
         if (this.field.collides(this.shape)) {
             // game over
-            this.state = 2;
+            this.state = TetrisState.GAME_OVER;
             this.deathTime = this.nextDropTime;
         }
     }
@@ -110,13 +116,13 @@ export class TetrisGame {
             this.inputElapsedTime = Date.now();
         }
 
-        if (this.state === 0) {
+        if (this.state === TetrisState.INPUT_ALLOWED) {
             if (this.shape !== null) {
                 if (Date.now() >= this.nextDropTime) {
                     this.moveDown();
                 }
             }
-        } else if (this.state === 1) {
+        } else if (this.state === TetrisState.FULL_ROW_ANIMATION) {
             if (Date.now() >= this.nextDropTime) {
                 const fullRows: number = this.field.getNumberOfFullRows();
                 this.updateScore(this.level, fullRows);
@@ -127,7 +133,7 @@ export class TetrisGame {
                     Math.min(this.startLevel * 10 + 10, Math.max(100, this.startLevel * 10 - 50));
                 this.level = Math.floor(Math.max(this.lineCounter - firstLevelStep, 0) / 10) +
                     (this.lineCounter >= firstLevelStep ? 1 : 0) + this.startLevel;
-                this.state = 0;
+                this.state = TetrisState.INPUT_ALLOWED;
             }
         }
 
@@ -194,8 +200,12 @@ export class TetrisGame {
         }
     }
 
+    public isInputAllowed(): boolean {
+        return this.state === TetrisState.INPUT_ALLOWED;
+    }
+
     public moveDown(): void {
-        if (this.state === 2) {
+        if (!this.isInputAllowed()) {
             return;
         }
 
@@ -221,14 +231,14 @@ export class TetrisGame {
 
             this.fullRows = this.field.getfFullRows();
             this.nextDropTime = this.oldDropTime + TetrisGame.FULL_ROW_ANIMATION_DELAY;
-            this.state = 1;
+            this.state = TetrisState.FULL_ROW_ANIMATION;
         } else {
             this.nextDropTime = this.oldDropTime + TetrisGame.DELAY_AFTER_DROP;
         }
     }
 
     public hardDrop(): void {
-        if (this.state === 2) {
+        if (!this.isInputAllowed()) {
             return;
         }
 
