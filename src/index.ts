@@ -528,8 +528,10 @@ document.addEventListener(KEY_DOWN_EVENT_LISTENER, (event: KeyboardEvent) => {
         if (state === 4) {
             // FIXME: remove this side effect code
             // maybe use const fps with num of frames for timing?
-            tetris.nextDropTime = Date.now();
-            tetris.moveDown();
+            if (tetris.isInputAllowed()) {
+                tetris.nextDropTime = Date.now();
+                tetris.moveDown();
+            }
         }
 
         if (state === 2) {
